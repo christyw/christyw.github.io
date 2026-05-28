@@ -35,10 +35,63 @@ html,body{width:100%;height:100%;overflow:hidden;background:#C8B888;cursor:none;
 .spacer{flex:0 0 auto;pointer-events:none}
 
 .obj{position:relative;transform-style:preserve-3d;transition:transform .72s cubic-bezier(.4,0,.2,1);cursor:none}
-.obj-wrap:hover .obj{transform:rotateY(180deg)}
 
 .obj-face{backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:4px;overflow:hidden}
-.obj-back{position:absolute;top:0;left:0;right:0;bottom:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;transform:rotateY(180deg);background:rgba(250,246,236,.96);border:1.5px solid rgba(180,160,100,.45);border-radius:4px;padding:1.3rem 1.5rem;display:flex;flex-direction:column;justify-content:center;box-shadow:0 12px 40px rgba(40,30,10,.22),0 0 0 1px rgba(255,252,240,.5) inset}
+.obj-back{position:absolute;top:0;left:0;right:0;bottom:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;transform:rotateY(180deg);background:rgba(250,246,236,.97);border:1.5px solid rgba(180,160,100,.45);border-radius:4px;padding:1.3rem 1.5rem;display:flex;flex-direction:column;justify-content:center;box-shadow:0 12px 40px rgba(40,30,10,.22),0 0 0 1px rgba(255,252,240,.5) inset}
+
+/* ── EXPANDED / CLICKED STATE ── */
+/* Backdrop */
+#backdrop{
+  position:fixed;inset:0;z-index:50;
+  background:rgba(30,20,8,.55);
+  backdrop-filter:blur(3px);
+  opacity:0;pointer-events:none;
+  transition:opacity .4s ease;
+}
+#backdrop.on{opacity:1;pointer-events:all}
+
+/* The expanded card — centred fixed overlay */
+.obj-wrap.expanded{
+  position:fixed;
+  z-index:60;
+  pointer-events:all;
+  /* centred by JS */
+  align-items:center;
+  justify-content:center;
+}
+
+/* When expanded, the inner .obj is flipped AND scaled up */
+.obj-wrap.expanded .obj{
+  transform:rotateY(180deg) scale(1);
+  /* actual scale applied via JS inline so we can size to content */
+}
+
+/* Expanded back gets more generous padding and bigger text */
+.obj-wrap.expanded .obj-back{
+  padding:2rem 2.4rem;
+  overflow-y:auto;
+}
+.obj-wrap.expanded .back-title{font-size:clamp(1.3rem,2vw,1.9rem)}
+.obj-wrap.expanded .back-body{font-size:.85rem}
+.obj-wrap.expanded .mini-card-t{font-size:1rem}
+.obj-wrap.expanded .wrow-t{font-size:.98rem}
+.obj-wrap.expanded .ig-icon,.obj-wrap.expanded .mgcell{font-size:1.4rem}
+
+/* Close button */
+#close-btn{
+  position:fixed;top:1.6rem;right:1.8rem;
+  z-index:70;
+  width:36px;height:36px;border-radius:50%;
+  background:rgba(248,244,236,.9);
+  border:1px solid rgba(180,160,100,.4);
+  display:none;align-items:center;justify-content:center;
+  font-size:16px;color:#5A4A2A;
+  cursor:none;
+  transition:background .2s,transform .15s;
+  box-shadow:0 4px 16px rgba(40,30,10,.18);
+}
+#close-btn.on{display:flex}
+#close-btn:hover{background:rgba(255,252,240,1);transform:scale(1.08)}
 
 .back-tag{font-size:9px;font-weight:500;letter-spacing:.22em;text-transform:uppercase;color:var(--ac,#C8960A);margin-bottom:.55rem;display:flex;align-items:center;gap:6px}
 .back-tag::after{content:'';flex:0 0 22px;height:1px;background:var(--ac,#C8960A);opacity:.4}
@@ -421,6 +474,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:#C8B888;cursor:none;
 </div>
 </div>
 
+<div id="backdrop"></div>
+<button id="close-btn" aria-label="Close">✕</button>
+
 <div id="nav">
   <div class="dot on" data-i="0"></div>
   <div class="dot" data-i="1"></div>
@@ -465,9 +521,13 @@ const lawns=document.getElementById('lawns');
 const fountain=document.getElementById('fountain');
 const dots=Array.from(document.querySelectorAll('.dot'));
 const label=document.getElementById('sec-label');
+const backdrop=document.getElementById('backdrop');
+const closeBtn=document.getElementById('close-btn');
+let activeWrap=null,savedStyle={};
+const EXPANDED_W=420,EXPANDED_H=520;
 const sectionLabels=['Christy Wong','About me','Interests','Gallery','Work','Writing','Contact'];
 
-let curX=0,tgtX=0,isDrag=false,dX=0,dStart=0,curSec=0;
+let curX=0,tgtX=0,isDrag=false,dX=0,dStart=0,curSec=0,didMove=false;
 function maxW(){return Math.max(0,track.scrollWidth-window.innerWidth)}
 function secX(i){return Math.min(i*maxW()/Math.max(1,dots.length-1),maxW())}
 function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
@@ -497,10 +557,10 @@ let lastT=0;
   requestAnimationFrame(raf);
 })(0);
 
-window.addEventListener('wheel',e=>{e.preventDefault();tgtX=clamp(tgtX-(e.deltaX||e.deltaY)*1.4,-maxW(),0);},{passive:false});
-window.addEventListener('pointerdown',e=>{if(e.target.closest('a,.clink'))return;isDrag=true;dX=e.clientX;dStart=curX;document.body.style.userSelect='none';});
-window.addEventListener('pointermove',e=>{if(!isDrag)return;curX=clamp(dStart+(e.clientX-dX),-maxW(),0);tgtX=curX;});
-window.addEventListener('pointerup',()=>{isDrag=false;document.body.style.userSelect='';});
+window.addEventListener('wheel',e=>{e.preventDefault();if(activeWrap)return;tgtX=clamp(tgtX-(e.deltaX||e.deltaY)*1.4,-maxW(),0);},{passive:false});
+window.addEventListener('pointerdown',e=>{if(e.target.closest('a,.clink'))return;if(activeWrap)return;isDrag=false;didMove=false;dX=e.clientX;dStart=curX;document.body.style.userSelect='none';});
+window.addEventListener('pointermove',e=>{if(activeWrap)return;const moved=Math.abs(e.clientX-dX)>4;if(moved){isDrag=true;didMove=true;curX=clamp(dStart+(e.clientX-dX),-maxW(),0);tgtX=curX;}});
+window.addEventListener('pointerup',()=>{setTimeout(()=>{isDrag=false;},50);document.body.style.userSelect='';});
 window.addEventListener('keydown',e=>{
   const s=maxW()/Math.max(1,dots.length-1);
   if(e.key==='ArrowRight'||e.key==='ArrowDown')tgtX=clamp(tgtX-s,-maxW(),0);
@@ -508,14 +568,133 @@ window.addEventListener('keydown',e=>{
 });
 dots.forEach((d,i)=>d.addEventListener('click',()=>{tgtX=-secX(i);}));
 
+// ── Cursor ──────────────────────────────────────
 const cur=document.getElementById('cur'),ring=document.getElementById('cur-ring');
 let mx=0,my=0,rx=0,ry=0;
 window.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.left=mx+'px';cur.style.top=my+'px';});
 (function rl(){rx+=(mx-rx)*.14;ry+=(my-ry)*.14;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(rl);})();
-document.querySelectorAll('.obj-wrap').forEach(el=>{
-  el.addEventListener('mouseenter',()=>{cur.classList.add('hov');ring.classList.add('hov');});
-  el.addEventListener('mouseleave',()=>{cur.classList.remove('hov');ring.classList.remove('hov');});
+
+// ── Click-to-expand ──────────────────────────────
+
+function openObj(wrap){
+  if(activeWrap) closeObj();
+
+  // Snapshot original layout position so we can restore
+  const rect=wrap.getBoundingClientRect();
+  savedStyle={
+    position:wrap.style.position,
+    left:wrap.style.left,
+    top:wrap.style.top,
+    width:wrap.style.width,
+    height:wrap.style.height,
+    zIndex:wrap.style.zIndex,
+    paddingBottom:wrap.style.paddingBottom,
+    transform:wrap.style.transform,
+    transition:wrap.style.transition,
+    marginLeft:wrap.style.marginLeft,
+    marginRight:wrap.style.marginRight,
+  };
+
+  // Freeze in place first (no jump)
+  wrap.style.position='fixed';
+  wrap.style.left=rect.left+'px';
+  wrap.style.top=rect.top+'px';
+  wrap.style.width=rect.width+'px';
+  wrap.style.height=rect.height+'px';
+  wrap.style.paddingBottom='0';
+  wrap.style.zIndex='60';
+  wrap.style.transition='none';
+  wrap.style.marginLeft='0';
+  wrap.style.marginRight='0';
+
+  // Force reflow then animate to centre
+  wrap.getBoundingClientRect();
+
+  const cX=window.innerWidth/2-EXPANDED_W/2;
+  const cY=window.innerHeight/2-EXPANDED_H/2;
+
+  wrap.style.transition='left .45s cubic-bezier(.4,0,.2,1),top .45s cubic-bezier(.4,0,.2,1),width .45s cubic-bezier(.4,0,.2,1),height .45s cubic-bezier(.4,0,.2,1)';
+  wrap.style.left=cX+'px';
+  wrap.style.top=cY+'px';
+  wrap.style.width=EXPANDED_W+'px';
+  wrap.style.height=EXPANDED_H+'px';
+
+  // Flip the inner obj
+  const obj=wrap.querySelector('.obj');
+  obj.style.width=EXPANDED_W+'px';
+  obj.style.height=EXPANDED_H+'px';
+  obj.style.transition='transform .65s cubic-bezier(.4,0,.2,1)';
+  obj.style.transform='rotateY(180deg)';
+
+  wrap.classList.add('expanded');
+  backdrop.classList.add('on');
+  closeBtn.classList.add('on');
+  activeWrap=wrap;
+
+  // Cursor feedback
+  cur.classList.add('hov'); ring.classList.add('hov');
+}
+
+function closeObj(){
+  if(!activeWrap) return;
+  const wrap=activeWrap;
+  const obj=wrap.querySelector('.obj');
+
+  // Flip back
+  obj.style.transform='rotateY(0deg)';
+
+  // Shrink back — animate position back (approx original; exact restore looks jarring so just fade out)
+  wrap.style.transition='left .4s cubic-bezier(.4,0,.2,1),top .4s cubic-bezier(.4,0,.2,1),width .4s cubic-bezier(.4,0,.2,1),height .4s cubic-bezier(.4,0,.2,1),opacity .35s ease';
+  wrap.style.opacity='0';
+
+  backdrop.classList.remove('on');
+  closeBtn.classList.remove('on');
+
+  setTimeout(()=>{
+    wrap.classList.remove('expanded');
+    // Restore to flow
+    wrap.style.position=savedStyle.position||'';
+    wrap.style.left=savedStyle.left||'';
+    wrap.style.top=savedStyle.top||'';
+    wrap.style.width=savedStyle.width||'';
+    wrap.style.height=savedStyle.height||'';
+    wrap.style.paddingBottom=savedStyle.paddingBottom||'';
+    wrap.style.zIndex=savedStyle.zIndex||'';
+    wrap.style.transition=savedStyle.transition||'';
+    wrap.style.marginLeft=savedStyle.marginLeft||'';
+    wrap.style.marginRight=savedStyle.marginRight||'';
+    wrap.style.opacity='';
+    obj.style.width='';
+    obj.style.height='';
+    obj.style.transform='';
+    activeWrap=null;
+    cur.classList.remove('hov'); ring.classList.remove('hov');
+  },420);
+}
+
+document.querySelectorAll('.obj-wrap').forEach(wrap=>{
+  // Hover cursor
+  wrap.addEventListener('mouseenter',()=>{ if(!activeWrap){cur.classList.add('hov');ring.classList.add('hov');} });
+  wrap.addEventListener('mouseleave',()=>{ if(!activeWrap){cur.classList.remove('hov');ring.classList.remove('hov');} });
+
+  // Click to open — only if not dragging
+  wrap.addEventListener('click',e=>{
+    if(isDrag) return;
+    if(e.target.closest('a,.clink')) return;
+    if(wrap.classList.contains('expanded')){closeObj();return;}
+    if(activeWrap){closeObj();setTimeout(()=>openObj(wrap),420);return;}
+    openObj(wrap);
+  });
 });
+
+backdrop.addEventListener('click',closeObj);
+closeBtn.addEventListener('click',closeObj);
+window.addEventListener('keydown',e=>{ if(e.key==='Escape') closeObj(); });
+
+// Prevent scroll from closing/opening unexpectedly when expanded
+window.addEventListener('wheel',e=>{if(activeWrap) e.stopPropagation();},{capture:true,passive:false});
+
+// ── Scroll hint ──────────────────────────────────
 const hint=document.getElementById('hint');
 const hh=()=>hint.style.display='none';
 window.addEventListener('wheel',hh,{once:true});
