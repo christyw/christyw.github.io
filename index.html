@@ -1,1428 +1,755 @@
 <!DOCTYPE html>
-<html lang="en"><head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Christiana Wong</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&amp;family=DM+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --brand: #1390c6;
-      --brand-light: #e8f6fb;
-      --cream: #f5f0e8;
-      --warm-white: #fffdf9;
-      --stone: #c9bfb0;
-      --charcoal: #2d2926;
-      --terracotta: #a85638;
-      --brick: #8b4332;
-      --brick-light: #b86b5a;
-      --grass: #4a7a3a;
-      --grass-light: #6b9a5a;
-      --grass-mid: #5a8a4a;
-      --sky: #5a9fd4;
-      --sky-light: #8ac4e8;
-      --pool: #6ab4cc;
-      --pool-deep: #4a94ac;
-    }
-
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    html, body {
-      overflow: hidden;
-      height: 100%;
-    }
-
-    body {
-      font-family: 'DM Sans', sans-serif;
-      color: var(--charcoal);
-    }
-
-    /* === 3D SCENE CONTAINER === */
-    .scene-container {
-      width: 100vw;
-      height: 100vh;
-      overflow-x: auto;
-      overflow-y: hidden;
-      cursor: grab;
-      scrollbar-width: none;
-      perspective: 1000px;
-      perspective-origin: 50% 80%;
-    }
-
-    .scene-container::-webkit-scrollbar { display: none; }
-    .scene-container:active { cursor: grabbing; }
-
-    /* === SKY === */
-    .sky {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 38vh;
-      background: linear-gradient(180deg, 
-        #2a6aa8 0%, 
-        #4a8ac8 25%,
-        var(--sky) 50%, 
-        var(--sky-light) 80%,
-        #d0e4f0 100%);
-      z-index: 0;
-    }
-
-    .cloud {
-      position: fixed;
-      background: rgba(255, 255, 255, 0.92);
-      border-radius: 100px;
-      z-index: 1;
-      filter: blur(1px);
-    }
-
-    .cloud::before, .cloud::after {
-      content: '';
-      position: absolute;
-      background: inherit;
-      border-radius: 50%;
-    }
-
-    .cloud-1 { width: 140px; height: 40px; top: 4vh; left: 5%; }
-    .cloud-1::before { width: 55px; height: 55px; top: -28px; left: 22px; }
-    .cloud-1::after { width: 70px; height: 70px; top: -35px; left: 55px; }
-
-    .cloud-2 { width: 100px; height: 30px; top: 7vh; left: 45%; }
-    .cloud-2::before { width: 40px; height: 40px; top: -20px; left: 18px; }
-    .cloud-2::after { width: 50px; height: 50px; top: -25px; left: 45px; }
-
-    .cloud-3 { width: 80px; height: 25px; top: 3vh; left: 75%; }
-    .cloud-3::before { width: 35px; height: 35px; top: -18px; left: 12px; }
-    .cloud-3::after { width: 42px; height: 42px; top: -21px; left: 38px; }
-
-    /* === 3D GROUND PLANE === */
-    .ground-3d {
-      position: fixed;
-      bottom: 0;
-      left: -100%;
-      width: 300%;
-      height: 70vh;
-      background: linear-gradient(180deg, 
-        #7db36a 0%,
-        var(--grass-light) 15%,
-        var(--grass-mid) 40%,
-        var(--grass) 100%);
-      transform: rotateX(60deg);
-      transform-origin: center bottom;
-      z-index: 2;
-    }
-
-    .ground-3d::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background-image: 
-        radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px),
-        radial-gradient(circle, rgba(0,0,0,0.04) 1px, transparent 1px);
-      background-size: 15px 30px, 20px 40px;
-      background-position: 0 0, 10px 15px;
-    }
-
-    /* Grass surface overlay for proper z-index */
-    .grass-overlay {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 62vh;
-      background: linear-gradient(180deg, 
-        transparent 0%,
-        rgba(107, 154, 90, 0.3) 10%,
-        var(--grass-light) 25%,
-        var(--grass-mid) 50%,
-        var(--grass) 100%);
-      z-index: 3;
-      pointer-events: none;
-    }
-
-    /* === BUILDING FACADE (in distance) === */
-    .facade-back {
-      position: fixed;
-      top: 5vh;
-      left: 50%;
-      transform: translateX(-50%) perspective(800px) rotateX(2deg);
-      width: 92vw;
-      height: 33vh;
-      background: linear-gradient(180deg, var(--brick) 0%, var(--terracotta) 65%, var(--brick-light) 100%);
-      z-index: 4;
-      border-radius: 0 0 4px 4px;
-      box-shadow: 0 15px 50px rgba(0,0,0,0.3);
-    }
-
-    .window-row {
-      position: absolute;
-      bottom: 10%;
-      left: 3%;
-      right: 3%;
-      display: flex;
-      justify-content: space-around;
-    }
-
-    .arch-win {
-      width: 50px;
-      height: 90px;
-      background: linear-gradient(180deg, #1a2530 0%, #0f1820 100%);
-      border-radius: 25px 25px 0 0;
-      position: relative;
-      box-shadow: inset 0 0 15px rgba(0,0,0,0.5);
-    }
-
-    .arch-win::before {
-      content: '';
-      position: absolute;
-      top: -6px; left: -6px; right: -6px; bottom: -2px;
-      border: 6px solid #d4a574;
-      border-radius: 31px 31px 0 0;
-    }
-
-    .arch-win::after {
-      content: '';
-      position: absolute;
-      top: 8%; left: 12%;
-      width: 22%; height: 28%;
-      background: linear-gradient(135deg, rgba(150, 200, 255, 0.2) 0%, transparent 100%);
-      border-radius: 10px 10px 0 0;
-    }
-
-    .frieze {
-      position: absolute;
-      top: 5%;
-      left: 0; right: 0;
-      height: 18px;
-      background: linear-gradient(180deg, #d4a574 0%, #c49464 50%, #b48454 100%);
-      border-top: 2px solid #6b3528;
-      border-bottom: 2px solid #6b3528;
-    }
-
-    .pediment {
-      position: absolute;
-      top: -5vh;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 0; height: 0;
-      border-left: 10vw solid transparent;
-      border-right: 10vw solid transparent;
-      border-bottom: 5vh solid var(--brick);
-    }
-
-    .cornice-back {
-      position: absolute;
-      bottom: 0;
-      left: 0; right: 0;
-      height: 15px;
-      background: linear-gradient(180deg, #e0d4c4 0%, #c9bfb0 100%);
-    }
-
-    /* Side walls with strong perspective */
-    .facade-left {
-      position: fixed;
-      top: 8vh;
-      left: 0;
-      height: 42vh;
-      width: 18vw;
-      background: linear-gradient(90deg, var(--brick) 0%, var(--terracotta) 100%);
-      transform: perspective(600px) rotateY(35deg);
-      transform-origin: left center;
-      z-index: 3;
-    }
-
-    .facade-right {
-      position: fixed;
-      top: 8vh;
-      right: 0;
-      height: 42vh;
-      width: 18vw;
-      background: linear-gradient(-90deg, var(--brick) 0%, var(--terracotta) 100%);
-      transform: perspective(600px) rotateY(-35deg);
-      transform-origin: right center;
-      z-index: 3;
-    }
-
-    /* === STEPPED FOUNTAIN (3D perspective) === */
-    .fountain {
-      position: fixed;
-      bottom: 28vh;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 10;
-    }
-
-    .fountain-step {
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%) rotateX(25deg);
-      transform-style: preserve-3d;
-      border-radius: 50%;
-    }
-
-    .step-1 {
-      width: 380px;
-      height: 100px;
-      bottom: 0;
-      background: linear-gradient(180deg, 
-        #f0e8dc 0%, 
-        #e0d8cc 20%,
-        #c9c0b4 60%,
-        #b8b0a4 100%);
-      box-shadow: 
-        0 8px 0 #a8a090,
-        0 12px 25px rgba(0,0,0,0.2);
-    }
-
-    .step-2 {
-      width: 320px;
-      height: 85px;
-      bottom: 18px;
-      background: linear-gradient(180deg, 
-        #e8e0d4 0%,
-        #d8d0c4 30%,
-        #c0b8ac 100%);
-      box-shadow: 
-        0 6px 0 #a0988c,
-        0 10px 20px rgba(0,0,0,0.15);
-    }
-
-    .step-3 {
-      width: 260px;
-      height: 70px;
-      bottom: 34px;
-      background: linear-gradient(180deg, 
-        #e0d8cc 0%,
-        #d0c8bc 30%,
-        #b8b0a4 100%);
-      box-shadow: 
-        0 5px 0 #98908c,
-        0 8px 15px rgba(0,0,0,0.12);
-    }
-
-    .step-4 {
-      width: 200px;
-      height: 55px;
-      bottom: 48px;
-      background: linear-gradient(180deg, 
-        #d8d0c4 0%,
-        #c8c0b4 30%,
-        #b0a89c 100%);
-      box-shadow: 
-        0 4px 0 #908880,
-        0 6px 12px rgba(0,0,0,0.1);
-    }
-
-    .water {
-      position: absolute;
-      width: 150px;
-      height: 42px;
-      bottom: 62px;
-      left: 50%;
-      transform: translateX(-50%) rotateX(25deg);
-      background: linear-gradient(180deg, 
-        #8cc8dc 0%,
-        var(--pool) 40%,
-        var(--pool-deep) 100%);
-      border-radius: 50%;
-      box-shadow: 
-        inset 0 5px 20px rgba(0,0,0,0.2),
-        inset 0 -3px 10px rgba(255,255,255,0.15);
-      overflow: hidden;
-    }
-
-    .water::before {
-      content: '';
-      position: absolute;
-      top: 8%; left: 15%;
-      width: 40%; height: 35%;
-      background: linear-gradient(180deg, rgba(255,255,255,0.4) 0%, transparent 100%);
-      border-radius: 50%;
-    }
-
-    .ripple {
-      position: absolute;
-      border: 1px solid rgba(255,255,255,0.5);
-      border-radius: 50%;
-      animation: ripple 2.5s ease-out infinite;
-    }
-
-    .ripple:nth-child(1) { width: 20px; height: 8px; top: 40%; left: 25%; }
-    .ripple:nth-child(2) { width: 30px; height: 12px; top: 35%; left: 50%; animation-delay: 0.8s; }
-    .ripple:nth-child(3) { width: 18px; height: 7px; top: 50%; left: 30%; animation-delay: 1.6s; }
-
-    @keyframes ripple {
-      0% { transform: scale(0.6); opacity: 0.7; }
-      100% { transform: scale(1.5); opacity: 0; }
-    }
-
-    /* === CONTENT LAYER === */
-    .content-layer {
-      position: relative;
-      width: 400vw;
-      height: 100vh;
-      z-index: 20;
-    }
-
-    /* === 3D FURNITURE === */
-
-    /* Bistro Chair - 3D with seat depth */
-    .chair-3d {
-      position: absolute;
-      z-index: 15;
-      transform-style: preserve-3d;
-    }
-
-    .chair-3d-seat {
-      width: 32px;
-      height: 16px;
-      background: linear-gradient(180deg, #4a4540 0%, #3a3530 100%);
-      border-radius: 3px;
-      transform: rotateX(50deg);
-      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-    }
-
-    .chair-3d-back {
-      width: 28px;
-      height: 32px;
-      background: linear-gradient(180deg, #5a5550 0%, #4a4540 50%, #3a3530 100%);
-      border-radius: 4px 4px 0 0;
-      position: absolute;
-      bottom: 12px;
-      left: 2px;
-      transform: rotateX(-10deg);
-      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-    }
-
-    .chair-3d-back::before {
-      content: '';
-      position: absolute;
-      top: 4px; left: 3px; right: 3px; bottom: 4px;
-      border: 2px solid rgba(255,255,255,0.1);
-      border-radius: 3px;
-    }
-
-    .chair-3d-legs {
-      position: absolute;
-      bottom: -12px;
-      left: 3px;
-      width: 26px;
-      height: 12px;
-    }
-
-    .chair-leg {
-      position: absolute;
-      width: 3px;
-      height: 12px;
-      background: linear-gradient(180deg, #3a3530 0%, #2a2520 100%);
-      border-radius: 0 0 1px 1px;
-    }
-
-    .chair-leg:nth-child(1) { left: 0; }
-    .chair-leg:nth-child(2) { right: 0; }
-    .chair-leg:nth-child(3) { left: 0; top: -4px; height: 8px; }
-    .chair-leg:nth-child(4) { right: 0; top: -4px; height: 8px; }
-
-    /* Bistro Table - 3D */
-    .table-3d {
-      position: absolute;
-      z-index: 16;
-      transform-style: preserve-3d;
-    }
-
-    .table-3d-top {
-      width: 48px;
-      height: 24px;
-      background: radial-gradient(ellipse at 30% 30%, #ffffff 0%, #f5f0e8 30%, #e0d8cc 100%);
-      border-radius: 50%;
-      transform: rotateX(50deg);
-      box-shadow: 
-        0 2px 0 #c9c0b4,
-        0 4px 0 #b8b0a4,
-        0 8px 15px rgba(0,0,0,0.25);
-      border: 1px solid rgba(0,0,0,0.05);
-    }
-
-    .table-3d-leg {
-      position: absolute;
-      top: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 5px;
-      height: 22px;
-      background: linear-gradient(90deg, #2a2520 0%, #4a4540 50%, #2a2520 100%);
-      border-radius: 2px;
-    }
-
-    .table-3d-base {
-      position: absolute;
-      top: 30px;
-      left: 50%;
-      transform: translateX(-50%) rotateX(50deg);
-      width: 28px;
-      height: 14px;
-      background: linear-gradient(180deg, #3a3530 0%, #2a2520 100%);
-      border-radius: 50%;
-    }
-
-    /* Lounge Chair - 3D wooden slats */
-    .lounge-3d {
-      position: absolute;
-      z-index: 14;
-      transform-style: preserve-3d;
-    }
-
-    .lounge-3d-base {
-      width: 70px;
-      height: 20px;
-      background: repeating-linear-gradient(
-        90deg,
-        #d4a060 0px,
-        #d4a060 5px,
-        #c49050 5px,
-        #c49050 6px,
-        transparent 6px,
-        transparent 8px
-      );
-      transform: rotateX(45deg);
-      border-radius: 3px;
-      box-shadow: 0 6px 12px rgba(0,0,0,0.25);
-    }
-
-    .lounge-3d-back {
-      position: absolute;
-      bottom: 15px;
-      left: -5px;
-      width: 30px;
-      height: 40px;
-      background: repeating-linear-gradient(
-        0deg,
-        #d4a060 0px,
-        #d4a060 4px,
-        #c49050 4px,
-        #c49050 5px,
-        transparent 5px,
-        transparent 7px
-      );
-      transform: rotateY(15deg) rotateX(-20deg);
-      transform-origin: bottom left;
-      border-radius: 3px 3px 0 0;
-      box-shadow: -3px 3px 8px rgba(0,0,0,0.15);
-    }
-
-    .lounge-3d-frame {
-      position: absolute;
-      bottom: -8px;
-      left: 8px;
-      right: 8px;
-      height: 8px;
-      background: linear-gradient(180deg, #6a6560 0%, #4a4540 100%);
-      border-radius: 2px;
-      transform: rotateX(30deg);
-    }
-
-    /* Statue - 3D */
-    .statue-3d {
-      position: absolute;
-      z-index: 17;
-      transform-style: preserve-3d;
-    }
-
-    .statue-plinth {
-      width: 35px;
-      height: 12px;
-      background: linear-gradient(180deg, #e0d8cc 0%, #c0b8ac 50%, #a8a090 100%);
-      transform: rotateX(40deg);
-      border-radius: 2px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    }
-
-    .statue-figure {
-      position: absolute;
-      bottom: 8px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 18px;
-      height: 50px;
-      background: linear-gradient(90deg, #b8b0a4 0%, #e0d8cc 40%, #d0c8bc 70%, #b0a89c 100%);
-      border-radius: 9px 9px 4px 4px;
-      box-shadow: 3px 0 10px rgba(0,0,0,0.15);
-    }
-
-    .statue-figure::before {
-      content: '';
-      position: absolute;
-      top: -12px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 14px;
-      height: 14px;
-      background: radial-gradient(circle at 35% 35%, #e8e0d4 0%, #c8c0b4 100%);
-      border-radius: 50%;
-    }
-
-    /* People - 3D */
-    .person-3d {
-      position: absolute;
-      z-index: 18;
-      transform-style: preserve-3d;
-    }
-
-    .person-3d-head {
-      width: 12px;
-      height: 12px;
-      background: radial-gradient(circle at 35% 35%, #f5dcc8 0%, #d8c0a8 100%);
-      border-radius: 50%;
-      margin: 0 auto 2px;
-      box-shadow: 1px 1px 3px rgba(0,0,0,0.15);
-    }
-
-    .person-3d-body {
-      width: 16px;
-      height: 26px;
-      border-radius: 8px 8px 4px 4px;
-      margin: 0 auto;
-      box-shadow: 2px 2px 6px rgba(0,0,0,0.2);
-    }
-
-    .person-3d-legs {
-      display: flex;
-      justify-content: center;
-      gap: 3px;
-    }
-
-    .person-3d-leg {
-      width: 5px;
-      height: 16px;
-      border-radius: 0 0 2px 2px;
-      box-shadow: 1px 1px 3px rgba(0,0,0,0.15);
-    }
-
-    /* Dog - 3D */
-    .dog-3d {
-      position: absolute;
-      z-index: 17;
-      transform-style: preserve-3d;
-    }
-
-    .dog-3d-body {
-      width: 30px;
-      height: 14px;
-      background: linear-gradient(180deg, #b8946c 0%, #987454 50%, #785434 100%);
-      border-radius: 7px;
-      box-shadow: 2px 2px 6px rgba(0,0,0,0.25);
-      position: relative;
-    }
-
-    .dog-3d-head {
-      position: absolute;
-      left: -10px;
-      top: -2px;
-      width: 16px;
-      height: 14px;
-      background: radial-gradient(ellipse at 40% 40%, #b8946c 0%, #987454 100%);
-      border-radius: 8px 5px 5px 8px;
-      box-shadow: -1px 1px 4px rgba(0,0,0,0.15);
-    }
-
-    .dog-3d-head::before {
-      content: '';
-      position: absolute;
-      right: 4px;
-      top: 4px;
-      width: 3px;
-      height: 3px;
-      background: #1a1a1a;
-      border-radius: 50%;
-    }
-
-    .dog-3d-head::after {
-      content: '';
-      position: absolute;
-      right: 1px;
-      top: 8px;
-      width: 4px;
-      height: 2px;
-      background: #2a2a2a;
-      border-radius: 2px;
-    }
-
-    .dog-3d-tail {
-      position: absolute;
-      right: -8px;
-      top: -3px;
-      width: 10px;
-      height: 4px;
-      background: #987454;
-      border-radius: 4px;
-      transform: rotate(-25deg);
-    }
-
-    .dog-3d-legs {
-      position: absolute;
-      bottom: -7px;
-      left: 3px;
-      right: 3px;
-      display: flex;
-      justify-content: space-between;
-    }
-
-    .dog-3d-leg {
-      width: 4px;
-      height: 7px;
-      background: linear-gradient(180deg, #785434 0%, #583414 100%);
-      border-radius: 0 0 2px 2px;
-    }
-
-    /* Ball - 3D */
-    .ball-3d {
-      position: absolute;
-      width: 16px;
-      height: 16px;
-      background: radial-gradient(circle at 30% 30%, #ff9090 0%, #e04040 60%, #a02020 100%);
-      border-radius: 50%;
-      box-shadow: 
-        2px 3px 8px rgba(0,0,0,0.3),
-        inset -2px -2px 4px rgba(0,0,0,0.2);
-      z-index: 16;
-    }
-
-    /* === FLIP CARDS === */
-    .flip-card {
-      position: absolute;
-      perspective: 1000px;
-      cursor: pointer;
-      z-index: 25;
-      transition: transform 0.2s ease;
-    }
-
-    .flip-card:hover { transform: translateY(-5px) scale(1.02); }
-
-    .flip-inner {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      transition: transform 0.65s cubic-bezier(0.4, 0, 0.2, 1);
-      transform-style: preserve-3d;
-    }
-
-    .flip-card:hover .flip-inner:not(.flipped) { transform: rotateY(180deg); }
-    .flip-inner.flipped { transform: rotateY(180deg); }
-
-    .flip-front, .flip-back {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      backface-visibility: hidden;
-      border-radius: 10px;
-      overflow: hidden;
-    }
-
-    .flip-front {
-      box-shadow: 0 8px 30px rgba(0,0,0,0.3);
-    }
-
-    .flip-back {
-      transform: rotateY(180deg);
-      background: var(--warm-white);
-      box-shadow: 0 12px 45px rgba(0,0,0,0.35);
-      padding: 1rem;
-      box-sizing: border-box;
-      overflow-y: auto;
-    }
-
-    /* Card styles */
-    .card-about {
-      bottom: 42vh;
-      left: 10vw;
-      width: 140px;
-      height: 175px;
-    }
-
-    .card-about .flip-front {
-      background: linear-gradient(145deg, #c9a86c 0%, #a67c52 100%);
-      padding: 7px;
-    }
-
-    .card-about .front-inner {
-      width: 100%;
-      height: 100%;
-      border-radius: 5px;
-      overflow: hidden;
-      position: relative;
-    }
-
-    .card-about .front-inner img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .card-about .front-inner .label {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: linear-gradient(transparent, rgba(0,0,0,0.75));
-      padding: 22px 10px 10px;
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 0.9rem;
-      font-style: italic;
-      color: white;
-      text-align: center;
-    }
-
-    .card-work {
-      bottom: 32vh;
-      left: 65vw;
-      width: 150px;
-      height: 115px;
-    }
-
-    .card-work .flip-front {
-      background: white;
-    }
-
-    .card-work .flip-front img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .card-work .front-label {
-      position: absolute;
-      bottom: 10px;
-      left: 10px;
-      background: rgba(255,255,255,0.95);
-      padding: 5px 12px;
-      border-radius: 5px;
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: var(--charcoal);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-
-    .card-interests {
-      bottom: 38vh;
-      left: 135vw;
-      width: 145px;
-      height: 115px;
-    }
-
-    .card-interests .flip-front {
-      background: white;
-    }
-
-    .card-interests .flip-front img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .card-interests .front-label {
-      position: absolute;
-      bottom: 10px;
-      right: 10px;
-      background: rgba(255,255,255,0.95);
-      padding: 5px 12px;
-      border-radius: 5px;
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 0.8rem;
-      font-style: italic;
-      color: var(--charcoal);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-
-    .card-writing {
-      bottom: 35vh;
-      left: 210vw;
-      width: 165px;
-      height: 125px;
-    }
-
-    .card-writing .flip-front {
-      background: white;
-    }
-
-    .card-writing .flip-front img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .card-writing .front-label {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      background: rgba(0,0,0,0.65);
-      padding: 5px 12px;
-      border-radius: 5px;
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 0.75rem;
-      font-style: italic;
-      color: white;
-    }
-
-    .card-contact {
-      bottom: 36vh;
-      left: 290vw;
-      width: 140px;
-      height: 95px;
-    }
-
-    .card-contact .flip-front {
-      background: var(--warm-white);
-      display: flex;
-      transform: rotate(-3deg);
-      border: 1px solid #e8e0d4;
-    }
-
-    .postcard-img-side {
-      width: 42%;
-      background: linear-gradient(135deg, var(--sky-light) 0%, var(--pool) 100%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.8rem;
-    }
-
-    .postcard-text-side {
-      width: 58%;
-      padding: 10px;
-      position: relative;
-      border-left: 1px dashed #c9bfb0;
-    }
-
-    .postcard-stamp {
-      position: absolute;
-      top: 6px;
-      right: 6px;
-      width: 20px;
-      height: 24px;
-      background: var(--brand);
-      border-radius: 2px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.55rem;
-      color: white;
-    }
-
-    .postcard-lines {
-      position: absolute;
-      bottom: 10px;
-      left: 10px;
-      right: 10px;
-    }
-
-    .postcard-line {
-      height: 1px;
-      background: #c9bfb0;
-      margin: 6px 0;
-    }
-
-    /* Flip back content */
-    .flip-back h3 {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1.05rem;
-      font-weight: 600;
-      color: var(--charcoal);
-      margin: 0 0 0.5rem;
-    }
-
-    .flip-back p {
-      font-size: 0.7rem;
-      line-height: 1.55;
-      color: #5a5550;
-      margin: 0 0 0.5rem;
-    }
-
-    .flip-back a {
-      color: var(--brand);
-      text-decoration: none;
-      font-weight: 500;
-    }
-
-    .flip-back a:hover { text-decoration: underline; }
-
-    .flip-back .links {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-top: 0.5rem;
-    }
-
-    .flip-back .link-btn {
-      font-size: 0.62rem;
-      padding: 4px 10px;
-      background: var(--brand-light);
-      color: var(--brand);
-      border-radius: 12px;
-      text-decoration: none;
-      transition: all 0.2s;
-    }
-
-    .flip-back .link-btn:hover {
-      background: var(--brand);
-      color: white;
-    }
-
-    .card-label {
-      position: absolute;
-      bottom: -22px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 0.62rem;
-      color: #5a5550;
-      white-space: nowrap;
-      opacity: 0;
-      transition: opacity 0.25s;
-      font-style: italic;
-      background: rgba(255,255,255,0.95);
-      padding: 3px 10px;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-
-    .flip-card:hover .card-label { opacity: 1; }
-
-    /* Welcome */
-    .welcome {
-      position: fixed;
-      bottom: 45vh;
-      left: 3vw;
-      z-index: 22;
-    }
-
-    .welcome h1 {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(1rem, 2vw, 1.6rem);
-      font-weight: 500;
-      color: var(--charcoal);
-      margin: 0;
-      text-shadow: 0 2px 10px rgba(255,255,255,0.8);
-    }
-
-    .welcome p {
-      font-family: 'Cormorant Garamond', serif;
-      font-style: italic;
-      font-size: 0.7rem;
-      color: #5a5550;
-      margin: 0.15rem 0 0;
-    }
-
-    /* Hints */
-    .nav-hint {
-      position: fixed;
-      bottom: 1rem;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-      font-size: 0.58rem;
-      color: #5a5550;
-      background: rgba(255, 253, 249, 0.96);
-      padding: 0.35rem 0.7rem;
-      border-radius: 14px;
-      backdrop-filter: blur(8px);
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      z-index: 100;
-    }
-
-    .nav-hint svg {
-      width: 10px;
-      height: 10px;
-      animation: scrollHint 2s ease-in-out infinite;
-    }
-
-    @keyframes scrollHint {
-      0%, 100% { transform: translateX(0); }
-      50% { transform: translateX(3px); }
-    }
-
-    .click-hint {
-      position: fixed;
-      top: 1rem;
-      right: 1rem;
-      font-size: 0.52rem;
-      color: #6a6055;
-      background: rgba(255, 253, 249, 0.96);
-      padding: 0.3rem 0.55rem;
-      border-radius: 10px;
-      z-index: 100;
-      backdrop-filter: blur(8px);
-    }
-
-    /* Mobile */
-    @media (max-width: 768px) {
-      .facade-left, .facade-right { display: none; }
-      .facade-back { width: 98vw; height: 26vh; top: 12vh; }
-      
-      .step-1 { width: 280px; height: 75px; }
-      .step-2 { width: 240px; height: 65px; bottom: 14px; }
-      .step-3 { width: 200px; height: 55px; bottom: 26px; }
-      .step-4 { width: 160px; height: 45px; bottom: 38px; }
-      .water { width: 120px; height: 35px; bottom: 50px; }
-
-      .card-about { left: 6vw; width: 115px; height: 145px; }
-      .card-work { left: 72vw; width: 120px; height: 95px; }
-      .card-interests { left: 155vw; width: 115px; height: 90px; }
-      .card-writing { left: 240vw; width: 135px; height: 100px; }
-      .card-contact { left: 330vw; width: 115px; height: 78px; }
-
-      .flip-back { padding: 0.65rem; }
-      .flip-back h3 { font-size: 0.9rem; }
-      .flip-back p { font-size: 0.62rem; }
-
-      .chair-3d, .table-3d, .lounge-3d, .statue-3d, .person-3d, .dog-3d, .ball-3d {
-        transform: scale(0.7);
-      }
-    }
-  </style>
-<script src="https://cdn.moda.app/runtime-libs/tailwind-browser-4.1.13-index.global.min.js"></script><style data-moda-export-fonts="true">@font-face { font-family: 'DM Sans'; src: url("../fonts/dmsans-thin.ttf") format("truetype"); font-style: normal; font-weight: 100; font-display: swap; }
-@font-face { font-family: 'DM Sans'; src: url("../fonts/dmsans-thinitalic.ttf") format("truetype"); font-style: italic; font-weight: 100; font-display: swap; }
-@font-face { font-family: 'DM Sans'; src: url("../fonts/dmsans-extralight.ttf") format("truetype"); font-style: normal; font-weight: 200; font-display: swap; }
-@font-face { font-family: 'DM Sans'; src: url("../fonts/dmsans-extralightitalic.ttf") format("truetype"); font-style: italic; font-weight: 200; font-display: swap; }
-@font-face { font-family: 'DM Sans'; src: url("../fonts/dmsans-light.ttf") format("truetype"); font-style: normal; font-weight: 300; font-display: swap; }
-@font-face { font-family: 'DM Sans'; src: url("../fonts/dmsans-lightitalic.ttf") format("truetype"); font-style: italic; font-weight: 300; font-display: swap; }
-@font-face { font-family: 'DM Sans'; src: url("../fonts/dmsans-regular.ttf") format("truetype"); font-style: normal; font-weight: 400; font-display: swap; }
-@font-face { font-family: 'DM Sans'; src: url("../fonts/dmsans-italic.ttf") format("truetype"); font-style: italic; font-weight: 400; font-display: swap; }
-@font-face { font-family: 'DM Sans'; src: url("../fonts/dmsans-medium.ttf") format("truetype"); font-style: normal; font-weight: 500; font-display: swap; }
-@font-face { font-family: 'DM Sans'; src: url("../fonts/dmsans-mediumitalic.ttf") format("truetype"); font-style: italic; font-weight: 500; font-display: swap; }
-@font-face { font-family: 'DM Sans'; src: url("../fonts/dmsans-semibold.ttf") format("truetype"); font-style: normal; font-weight: 600; font-display: swap; }
-@font-face { font-family: 'DM Sans'; src: url("../fonts/dmsans-semibolditalic.ttf") format("truetype"); font-style: italic; font-weight: 600; font-display: swap; }
-@font-face { font-family: 'DM Sans'; src: url("../fonts/dmsans-bold.ttf") format("truetype"); font-style: normal; font-weight: 700; font-display: swap; }
-@font-face { font-family: 'DM Sans'; src: url("../fonts/dmsans-bolditalic.ttf") format("truetype"); font-style: italic; font-weight: 700; font-display: swap; }
-@font-face { font-family: 'DM Sans'; src: url("../fonts/dmsans-extrabold.ttf") format("truetype"); font-style: normal; font-weight: 800; font-display: swap; }
-@font-face { font-family: 'DM Sans'; src: url("../fonts/dmsans-extrabolditalic.ttf") format("truetype"); font-style: italic; font-weight: 800; font-display: swap; }
-@font-face { font-family: 'DM Sans'; src: url("../fonts/dmsans-black.ttf") format("truetype"); font-style: normal; font-weight: 900; font-display: swap; }
-@font-face { font-family: 'DM Sans'; src: url("../fonts/dmsans-blackitalic.ttf") format("truetype"); font-style: italic; font-weight: 900; font-display: swap; }
-@font-face { font-family: 'Cormorant Garamond'; src: url("../fonts/cormorantgaramond-wght--light.ttf") format("truetype"); font-style: normal; font-weight: 300; font-display: swap; }
-@font-face { font-family: 'Cormorant Garamond'; src: url("../fonts/cormorantgaramond-wght--lightitalic.ttf") format("truetype"); font-style: italic; font-weight: 300; font-display: swap; }
-@font-face { font-family: 'Cormorant Garamond'; src: url("../fonts/cormorantgaramond-wght--regular.ttf") format("truetype"); font-style: normal; font-weight: 400; font-display: swap; }
-@font-face { font-family: 'Cormorant Garamond'; src: url("../fonts/cormorantgaramond-wght--italic.ttf") format("truetype"); font-style: italic; font-weight: 400; font-display: swap; }
-@font-face { font-family: 'Cormorant Garamond'; src: url("../fonts/cormorantgaramond-wght--medium.ttf") format("truetype"); font-style: normal; font-weight: 500; font-display: swap; }
-@font-face { font-family: 'Cormorant Garamond'; src: url("../fonts/cormorantgaramond-wght--mediumitalic.ttf") format("truetype"); font-style: italic; font-weight: 500; font-display: swap; }
-@font-face { font-family: 'Cormorant Garamond'; src: url("../fonts/cormorantgaramond-wght--semibold.ttf") format("truetype"); font-style: normal; font-weight: 600; font-display: swap; }
-@font-face { font-family: 'Cormorant Garamond'; src: url("../fonts/cormorantgaramond-wght--semibolditalic.ttf") format("truetype"); font-style: italic; font-weight: 600; font-display: swap; }
-@font-face { font-family: 'Cormorant Garamond'; src: url("../fonts/cormorantgaramond-wght--bold.ttf") format("truetype"); font-style: normal; font-weight: 700; font-display: swap; }
-@font-face { font-family: 'Cormorant Garamond'; src: url("../fonts/cormorantgaramond-wght--bolditalic.ttf") format("truetype"); font-style: italic; font-weight: 700; font-display: swap; }</style></head>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Christy Wong</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400;1,6..72,500&family=Geist+Mono:wght@300;400&family=Cabinet+Grotesk:wght@400;500;700;800&display=swap" rel="stylesheet">
+
+<style>
+/* ─────────────────────────────────────────
+   TOKENS
+───────────────────────────────────────── */
+:root {
+  --bg:       #F7F5F0;
+  --bg-2:     #EFECE4;
+  --ink:      #1A1714;
+  --ink-2:    #5C5650;
+  --ink-3:    #9A948C;
+  --rule:     rgba(26,23,20,.1);
+  --accent:   #D4500A;
+  --serif:    'Lora', Georgia, serif;
+  --mono:     'Geist Mono', 'Courier New', monospace;
+  --sans:     'Cabinet Grotesk', system-ui, sans-serif;
+  --sw:       240px;
+  --ease:     cubic-bezier(.4,0,.2,1);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--sans);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+::selection { background: var(--accent); color: #fff; }
+a { color: inherit; text-decoration: none; transition: color .2s; }
+a:hover { color: var(--accent); }
+
+/* ── LAYOUT ── */
+.layout { display: flex; min-height: 100vh; }
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: var(--sw);
+  flex-shrink: 0;
+  position: fixed;
+  inset: 0 auto 0 0;
+  padding: 2.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--rule);
+  background: var(--bg);
+  z-index: 50;
+}
+.sidebar-name {
+  font-family: var(--serif);
+  font-size: 1.05rem;
+  font-weight: 400;
+  letter-spacing: -.01em;
+  line-height: 1.3;
+  margin-bottom: .25rem;
+}
+.sidebar-name em { font-style: italic; color: var(--accent); }
+.sidebar-role {
+  font-family: var(--mono);
+  font-size: .65rem;
+  color: var(--ink-3);
+  letter-spacing: .05em;
+  margin-bottom: 2.5rem;
+  line-height: 1.6;
+}
+.nav { list-style: none; display: flex; flex-direction: column; gap: .1rem; }
+.nav-item a {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  padding: .45rem .6rem;
+  border-radius: 6px;
+  font-size: .85rem;
+  font-weight: 500;
+  color: var(--ink-2);
+  transition: background .15s var(--ease), color .15s var(--ease);
+  position: relative;
+}
+.nav-item a:hover { background: var(--bg-2); color: var(--ink); }
+.nav-item a.active { background: var(--bg-2); color: var(--ink); }
+.nav-item a.active::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 25%; bottom: 25%;
+  width: 2px;
+  background: var(--accent);
+  border-radius: 2px;
+}
+.nav-num {
+  font-family: var(--mono);
+  font-size: .62rem;
+  color: var(--ink-3);
+  width: 1.4rem;
+  flex-shrink: 0;
+}
+.sidebar-footer {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: .6rem;
+}
+.sidebar-link {
+  font-family: var(--mono);
+  font-size: .65rem;
+  color: var(--ink-3);
+  letter-spacing: .04em;
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  transition: color .15s;
+}
+.sidebar-link:hover { color: var(--ink); }
+
+/* ── MAIN ── */
+.main {
+  margin-left: var(--sw);
+  flex: 1;
+  max-width: 760px;
+  padding: 4rem 4rem 8rem;
+}
+
+/* ── SECTIONS ── */
+.section {
+  padding-top: 5rem;
+  border-top: 1px solid var(--rule);
+  margin-top: 5rem;
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity .55s var(--ease), transform .55s var(--ease);
+}
+.section:first-child { border-top: none; margin-top: 0; padding-top: 0; }
+.section.visible { opacity: 1; transform: none; }
+
+.section-label {
+  font-family: var(--mono);
+  font-size: .65rem;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+}
+.section-label::after {
+  content: '';
+  height: 1px; width: 32px;
+  background: var(--rule);
+  display: inline-block;
+}
+
+/* ── HERO ── */
+.hero-headline {
+  font-family: var(--serif);
+  font-size: clamp(1.9rem, 3.8vw, 2.9rem);
+  font-weight: 400;
+  line-height: 1.25;
+  letter-spacing: -.02em;
+  margin-bottom: 1.5rem;
+  max-width: 560px;
+}
+.hero-headline em { font-style: italic; color: var(--accent); }
+.hero-sub {
+  font-size: .95rem;
+  color: var(--ink-2);
+  line-height: 1.8;
+  max-width: 460px;
+  margin-bottom: 2rem;
+}
+.hero-sub strong { color: var(--ink); font-weight: 700; }
+.hero-tags { display: flex; flex-wrap: wrap; gap: .5rem; }
+.tag {
+  font-family: var(--mono);
+  font-size: .65rem;
+  letter-spacing: .06em;
+  padding: .3rem .7rem;
+  border: 1px solid var(--rule);
+  border-radius: 99px;
+  color: var(--ink-2);
+  transition: border-color .2s, color .2s, background .2s;
+}
+.tag:hover { border-color: var(--accent); color: var(--accent); background: rgba(212,80,10,.04); }
+
+/* ── NOW — icon cards ── */
+.now-grid { display: grid; gap: 1.5rem; margin-top: 2.5rem; }
+.now-item {
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  gap: 1.2rem;
+  align-items: start;
+  padding: 1.2rem;
+  border-radius: 10px;
+  border: 1px solid var(--rule);
+  background: var(--bg);
+  transition: border-color .2s var(--ease), background .2s var(--ease);
+  cursor: default;
+}
+.now-item:hover { border-color: rgba(26,23,20,.18); background: #fff; }
+.now-icon {
+  width: 72px; height: 72px;
+  border-radius: 8px;
+  background: var(--bg-2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.8rem;
+  flex-shrink: 0;
+  transition: transform .2s var(--ease);
+}
+.now-item:hover .now-icon { transform: scale(1.05); }
+.now-meta {
+  font-family: var(--mono);
+  font-size: .62rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-bottom: .3rem;
+}
+.now-title {
+  font-family: var(--serif);
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.35;
+  margin-bottom: .35rem;
+  color: var(--ink);
+}
+.now-title em { font-style: italic; color: var(--accent); }
+.now-body { font-size: .82rem; color: var(--ink-2); line-height: 1.75; }
+.now-body em { font-style: italic; }
+
+/* ── ABOUT ── */
+.about-body { display: flex; flex-direction: column; gap: 1rem; }
+.about-body p { font-size: .92rem; color: var(--ink-2); line-height: 1.85; }
+.about-body p strong { color: var(--ink); font-weight: 700; }
+.about-body p a { color: var(--accent); border-bottom: 1px solid rgba(212,80,10,.25); }
+.about-body p a:hover { border-color: var(--accent); }
+
+/* ── WRITING ── */
+/* Featured card */
+.writing-card {
+  display: block;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--rule);
+  background: #fff;
+  box-shadow: 0 4px 20px rgba(0,0,0,.05);
+  transition: transform .3s var(--ease), box-shadow .3s var(--ease);
+  margin-bottom: 1.75rem;
+  color: var(--ink);
+}
+.writing-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0,0,0,.1);
+  color: var(--ink);
+}
+.writing-card-image { height: 220px; overflow: hidden; background: var(--bg-2); }
+.writing-card-image img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  transition: transform .5s var(--ease);
+}
+.writing-card:hover .writing-card-image img { transform: scale(1.04); }
+.writing-card-body { padding: 1.75rem 2rem; }
+.writing-card-label {
+  font-family: var(--mono);
+  font-size: .62rem; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--ink-3); margin-bottom: .75rem;
+}
+.writing-card-title {
+  font-family: var(--serif);
+  font-size: 1.25rem; font-weight: 400;
+  color: var(--ink); margin-bottom: .75rem; letter-spacing: -.01em;
+}
+.writing-excerpt {
+  font-family: var(--serif);
+  font-style: italic; font-size: .95rem;
+  color: var(--ink-2); line-height: 1.75; margin-bottom: 1rem;
+}
+.read-more {
+  font-size: .85rem; font-weight: 500; color: var(--accent);
+  display: inline-flex; align-items: center; gap: 5px;
+}
+.read-more svg { transition: transform .2s; }
+.writing-card:hover .read-more svg { transform: translateX(4px); }
+
+/* Writing rows */
+.writing-list { display: flex; flex-direction: column; }
+.writing-row {
+  padding: 1.1rem 0;
+  border-bottom: 1px solid var(--rule);
+  display: grid;
+  grid-template-columns: 1fr 60px;
+  gap: 1rem; align-items: start;
+  transition: opacity .15s; cursor: pointer;
+}
+.writing-row:first-child { border-top: 1px solid var(--rule); }
+.writing-row:hover { opacity: .65; }
+.writing-row-title {
+  font-family: var(--serif); font-style: italic;
+  font-size: 1rem; color: var(--ink); line-height: 1.35; margin-bottom: .2rem;
+}
+.writing-row-desc { font-size: .78rem; color: var(--ink-3); line-height: 1.5; }
+.writing-date {
+  font-family: var(--mono); font-size: .6rem;
+  color: var(--ink-3); letter-spacing: .06em; text-align: right; padding-top: .2rem;
+}
+
+/* ── READING — coloured book covers ── */
+.reading-intro {
+  font-family: var(--serif); font-style: italic;
+  font-size: .92rem; color: var(--ink-2); line-height: 1.75; margin-bottom: 1.75rem;
+}
+.books-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 1.2rem;
+}
+.book-item {
+  display: flex; flex-direction: column; gap: .5rem; cursor: default;
+  transition: transform .2s var(--ease);
+}
+.book-item:hover { transform: translateY(-3px); }
+.book-cover {
+  width: 100%; aspect-ratio: 2/3;
+  border-radius: 4px;
+  display: flex; align-items: flex-end;
+  padding: .65rem .6rem;
+  position: relative; overflow: hidden;
+  box-shadow: 2px 4px 16px rgba(0,0,0,.14), 1px 0 0 rgba(0,0,0,.08);
+}
+.book-cover::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(160deg, rgba(255,255,255,.1) 0%, transparent 60%);
+}
+.book-spine {
+  position: absolute; left: 0; top: 0; bottom: 0;
+  width: 8px; background: rgba(0,0,0,.18);
+}
+.book-cover-title {
+  font-family: var(--serif); font-size: .66rem;
+  color: rgba(255,255,255,.92); line-height: 1.3; font-weight: 500;
+  position: relative; z-index: 1;
+}
+.book-author {
+  font-family: var(--mono); font-size: .6rem;
+  color: var(--ink-3); letter-spacing: .04em;
+}
+
+/* ── INTERESTS ── */
+.interests-intro { font-size: .9rem; color: var(--ink-2); line-height: 1.8; margin-bottom: 1.25rem; }
+.interests-grid { display: flex; flex-wrap: wrap; gap: .6rem; }
+.interest-tag {
+  font-size: .88rem;
+  padding: .55rem 1.1rem;
+  background: #fff; border: 1px solid var(--rule); border-radius: 99px;
+  color: var(--ink-2); transition: all .2s;
+}
+.interest-tag:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ── CONTACT ── */
+.contact-intro {
+  font-family: var(--serif); font-style: italic;
+  font-size: 1rem; color: var(--ink-2); line-height: 1.75; margin-bottom: 2rem; max-width: 420px;
+}
+.contact-links { display: flex; flex-direction: column; }
+.contact-link {
+  display: flex; align-items: center;
+  justify-content: space-between;
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--rule);
+  transition: opacity .15s; cursor: pointer;
+}
+.contact-link:first-child { border-top: 1px solid var(--rule); }
+.contact-link:hover { opacity: .6; color: var(--ink); }
+.contact-link-left { display: flex; align-items: center; gap: .75rem; }
+.contact-link-icon {
+  width: 36px; height: 36px; border-radius: 8px;
+  background: var(--bg-2); display: flex; align-items: center; justify-content: center;
+  font-size: .95rem;
+}
+.contact-link-name { font-weight: 500; font-size: .88rem; }
+.contact-link-handle { font-family: var(--mono); font-size: .62rem; color: var(--ink-3); }
+.contact-arrow {
+  font-size: .9rem; color: var(--ink-3);
+  transition: transform .2s var(--ease);
+}
+.contact-link:hover .contact-arrow { transform: translate(3px,-3px); }
+
+/* ── FOOTER ── */
+.footer {
+  margin-top: 5rem; padding-top: 2rem;
+  border-top: 1px solid var(--rule);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.footer-copy { font-family: var(--mono); font-size: .62rem; color: var(--ink-3); letter-spacing: .05em; }
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: none; }
+}
+.hero-headline { animation: fadeUp .6s var(--ease) .1s both; }
+.hero-sub      { animation: fadeUp .6s var(--ease) .22s both; }
+.hero-tags     { animation: fadeUp .6s var(--ease) .34s both; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 860px) {
+  :root { --sw: 200px; }
+  .main { padding: 3rem 2.5rem 6rem; }
+}
+@media (max-width: 660px) {
+  .layout { flex-direction: column; }
+  .sidebar {
+    position: static; width: 100%;
+    border-right: none; border-bottom: 1px solid var(--rule);
+    padding: 1.5rem 1.5rem 1rem;
+    flex-direction: row; align-items: center; gap: 2rem;
+  }
+  .sidebar-role, .sidebar-footer, .nav { display: none; }
+  .main { margin-left: 0; padding: 2rem 1.5rem 4rem; }
+  .now-item { grid-template-columns: 52px 1fr; }
+  .now-icon { width: 52px; height: 52px; font-size: 1.4rem; }
+  .books-grid { grid-template-columns: repeat(3, 1fr); }
+  .writing-card-image { height: 180px; }
+}
+</style>
+</head>
 <body>
-  <!-- Sky & Clouds -->
-  <div class="sky"></div>
-  <div class="cloud cloud-1"></div>
-  <div class="cloud cloud-2"></div>
-  <div class="cloud cloud-3"></div>
+<div class="layout">
 
-  <!-- Building Façade -->
-  <div class="facade-back">
-    <div class="pediment"></div>
-    <div class="frieze"></div>
-    <div class="window-row">
-      <div class="arch-win"></div>
-      <div class="arch-win"></div>
-      <div class="arch-win"></div>
-      <div class="arch-win"></div>
-      <div class="arch-win"></div>
-      <div class="arch-win"></div>
-      <div class="arch-win"></div>
+<!-- ── SIDEBAR ───────────────────────────────── -->
+<aside class="sidebar">
+  <div>
+    <div class="sidebar-name"><em>Christy</em> Wong</div>
+    <div class="sidebar-role">Data Engineer<br>Airbnb.org</div>
+  </div>
+  <nav>
+    <ul class="nav">
+      <li class="nav-item"><a href="#now"       class="active"><span class="nav-num">01</span> Now</a></li>
+      <li class="nav-item"><a href="#about"              ><span class="nav-num">02</span> About</a></li>
+      <li class="nav-item"><a href="#writing"            ><span class="nav-num">03</span> Writing</a></li>
+      <li class="nav-item"><a href="#reading"            ><span class="nav-num">04</span> Reading</a></li>
+      <li class="nav-item"><a href="#interests"          ><span class="nav-num">05</span> Interests</a></li>
+      <li class="nav-item"><a href="#contact"            ><span class="nav-num">06</span> Contact</a></li>
+    </ul>
+  </nav>
+  <div class="sidebar-footer">
+    <a class="sidebar-link" href="mailto:your@email.com">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+      Email
+    </a>
+    <a class="sidebar-link" href="https://github.com/yourhandle" target="_blank">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844a9.59 9.59 0 0 1 2.504.337c1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.02 10.02 0 0 0 22 12.017C22 6.484 17.522 2 12 2z"/></svg>
+      GitHub
+    </a>
+    <a class="sidebar-link" href="https://linkedin.com/in/yourhandle" target="_blank">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></svg>
+      LinkedIn
+    </a>
+  </div>
+</aside>
+
+<!-- ── MAIN ──────────────────────────────────── -->
+<main class="main">
+
+  <!-- 01 NOW -->
+  <section class="section visible" id="now">
+    <div class="section-label">01 — now</div>
+    <h1 class="hero-headline">
+      I'm Christy — I think a lot<br>and <em>write a little.</em>
+    </h1>
+    <p class="hero-sub">
+      Data engineer at <strong>Airbnb.org</strong>, working on disaster response
+      and emergency housing. Based in San Francisco. From <strong>Detroit</strong>.
+    </p>
+    <div class="hero-tags">
+      <span class="tag">running</span>
+      <span class="tag">tennis</span>
+      <span class="tag">museums</span>
+      <span class="tag">baking</span>
+      <span class="tag">modern art</span>
+      <span class="tag">snowboarding</span>
+      <span class="tag">travel</span>
+      <span class="tag">guitar</span>
     </div>
-    <div class="cornice-back"></div>
-  </div>
-  <div class="facade-left"></div>
-  <div class="facade-right"></div>
 
-  <!-- 3D Ground -->
-  <div class="ground-3d"></div>
-  <div class="grass-overlay"></div>
-
-  <!-- Stepped Fountain -->
-  <div class="fountain">
-    <div class="fountain-step step-1"></div>
-    <div class="fountain-step step-2"></div>
-    <div class="fountain-step step-3"></div>
-    <div class="fountain-step step-4"></div>
-    <div class="water">
-      <div class="ripple"></div>
-      <div class="ripple"></div>
-      <div class="ripple"></div>
+    <div class="now-grid">
+      <div class="now-item">
+        <div class="now-icon">🏗️</div>
+        <div>
+          <div class="now-meta">work</div>
+          <div class="now-title">Airbnb.org</div>
+          <p class="now-body">Data engineer for Airbnb.org, a disaster response and emergency housing non-profit. If you're curious about our work or want to get involved, feel free to reach out — I'm always happy to chat about it.</p>
+        </div>
+      </div>
+      <div class="now-item">
+        <div class="now-icon">🍳</div>
+        <div>
+          <div class="now-meta">learning</div>
+          <div class="now-title">Cooking (beyond eggs and toast)</div>
+          <p class="now-body">Making my way through <em>Salt, Acid, Fat, Heat</em> to understand the building blocks of good cooking. That said, I've always liked baking more — which tracks with a Karen Chee tweet: eldest siblings like cooking (survival skill) while younger siblings like baking (frivolous).</p>
+        </div>
+      </div>
+      <div class="now-item">
+        <div class="now-icon">⛷️</div>
+        <div>
+          <div class="now-meta">moving</div>
+          <div class="now-title">Being a beginner again</div>
+          <p class="now-body">I grew up playing tennis, field hockey, and lacrosse. Lately I've been mixing it up with new ones: soccer, lifting, pickleball, snowboarding, and dance. It's fun to be a beginner again.</p>
+        </div>
+      </div>
     </div>
-  </div>
+  </section>
 
-  <!-- Welcome -->
-  <div class="welcome">
-    <h1>Christiana Wong</h1>
-    <p>Welcome to my corner of the internet</p>
-  </div>
-
-  <!-- Hints -->
-  <div class="nav-hint">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"></path></svg>
-    <span>Scroll to explore</span>
-  </div>
-  <div class="click-hint">✨ Hover to peek · Click to keep</div>
-
-  <!-- Scrollable Content -->
-  <div class="scene-container" id="container">
-    <div class="content-layer">
-
-      <!-- 3D Lounge Chairs -->
-      <div class="lounge-3d" style="bottom: 28vh; left: 6vw;">
-        <div class="lounge-3d-back"></div>
-        <div class="lounge-3d-base"></div>
-        <div class="lounge-3d-frame"></div>
-      </div>
-      <div class="lounge-3d" style="bottom: 26vh; left: 14vw; transform: rotate(12deg);">
-        <div class="lounge-3d-back"></div>
-        <div class="lounge-3d-base"></div>
-        <div class="lounge-3d-frame"></div>
-      </div>
-
-      <!-- 3D Bistro Set -->
-      <div class="table-3d" style="bottom: 34vh; left: 90vw;">
-        <div class="table-3d-top"></div>
-        <div class="table-3d-leg"></div>
-        <div class="table-3d-base"></div>
-      </div>
-      <div class="chair-3d" style="bottom: 30vh; left: 86vw;">
-        <div class="chair-3d-back"></div>
-        <div class="chair-3d-seat"></div>
-        <div class="chair-3d-legs">
-          <div class="chair-leg"></div>
-          <div class="chair-leg"></div>
-          <div class="chair-leg"></div>
-          <div class="chair-leg"></div>
-        </div>
-      </div>
-      <div class="chair-3d" style="bottom: 30vh; left: 95vw; transform: scaleX(-1);">
-        <div class="chair-3d-back"></div>
-        <div class="chair-3d-seat"></div>
-        <div class="chair-3d-legs">
-          <div class="chair-leg"></div>
-          <div class="chair-leg"></div>
-          <div class="chair-leg"></div>
-          <div class="chair-leg"></div>
-        </div>
-      </div>
-
-      <div class="table-3d" style="bottom: 28vh; left: 175vw;">
-        <div class="table-3d-top"></div>
-        <div class="table-3d-leg"></div>
-        <div class="table-3d-base"></div>
-      </div>
-      <div class="chair-3d" style="bottom: 24vh; left: 172vw;">
-        <div class="chair-3d-back"></div>
-        <div class="chair-3d-seat"></div>
-        <div class="chair-3d-legs">
-          <div class="chair-leg"></div>
-          <div class="chair-leg"></div>
-        </div>
-      </div>
-
-      <!-- 3D Statues (on grass, away from fountain) -->
-      <div class="statue-3d" style="bottom: 42vh; left: 35vw;">
-        <div class="statue-figure"></div>
-        <div class="statue-plinth"></div>
-      </div>
-      <div class="statue-3d" style="bottom: 40vh; left: 250vw;">
-        <div class="statue-figure"></div>
-        <div class="statue-plinth"></div>
-      </div>
-
-      <!-- 3D Family -->
-      <div class="person-3d" style="bottom: 32vh; left: 52vw;">
-        <div class="person-3d-head"></div>
-        <div class="person-3d-body" style="background: linear-gradient(180deg, #5a7a9a 0%, #4a6a8a 100%);"></div>
-        <div class="person-3d-legs">
-          <div class="person-3d-leg" style="background: linear-gradient(180deg, #3a3a4a 0%, #2a2a3a 100%);"></div>
-          <div class="person-3d-leg" style="background: linear-gradient(180deg, #3a3a4a 0%, #2a2a3a 100%);"></div>
-        </div>
-      </div>
-      <div class="person-3d" style="bottom: 32vh; left: 55vw;">
-        <div class="person-3d-head"></div>
-        <div class="person-3d-body" style="background: linear-gradient(180deg, #c47070 0%, #a45050 100%); height: 30px; border-radius: 8px 8px 6px 6px;"></div>
-      </div>
-      <div class="person-3d" style="bottom: 30vh; left: 58vw; transform: scale(0.7);">
-        <div class="person-3d-head"></div>
-        <div class="person-3d-body" style="background: linear-gradient(180deg, #e8a050 0%, #d08030 100%);"></div>
-        <div class="person-3d-legs">
-          <div class="person-3d-leg" style="background: linear-gradient(180deg, #4a4a5a 0%, #3a3a4a 100%);"></div>
-          <div class="person-3d-leg" style="background: linear-gradient(180deg, #4a4a5a 0%, #3a3a4a 100%);"></div>
-        </div>
-      </div>
-
-      <!-- 3D Dog & Ball -->
-      <div class="dog-3d" style="bottom: 28vh; left: 61vw;">
-        <div class="dog-3d-body">
-          <div class="dog-3d-head"></div>
-          <div class="dog-3d-tail"></div>
-          <div class="dog-3d-legs">
-            <div class="dog-3d-leg"></div>
-            <div class="dog-3d-leg"></div>
-            <div class="dog-3d-leg"></div>
-            <div class="dog-3d-leg"></div>
-          </div>
-        </div>
-      </div>
-      <div class="ball-3d" style="bottom: 26vh; left: 65vw;"></div>
-
-      <!-- Another person -->
-      <div class="person-3d" style="bottom: 36vh; left: 115vw;">
-        <div class="person-3d-head"></div>
-        <div class="person-3d-body" style="background: linear-gradient(180deg, #6a9a6a 0%, #5a8a5a 100%);"></div>
-        <div class="person-3d-legs">
-          <div class="person-3d-leg" style="background: linear-gradient(180deg, #4a4a5a 0%, #3a3a4a 100%);"></div>
-          <div class="person-3d-leg" style="background: linear-gradient(180deg, #4a4a5a 0%, #3a3a4a 100%);"></div>
-        </div>
-      </div>
-
-      <!-- === FLIP CARDS === -->
-
-      <!-- ABOUT -->
-      <div class="flip-card card-about">
-        <div class="flip-inner">
-          <div class="flip-front">
-            <div class="front-inner">
-              <img src="../images/b5aa8337-e3b5-493f-9f87-8dd061993e9c.png" alt="Detroit skyline">
-              <div class="label">About Me</div>
-            </div>
-          </div>
-          <div class="flip-back">
-            <h3>Hello, I'm Christy!</h3>
-            <p>People assume I'm from California—something about my voice. But I grew up in <strong>Detroit</strong>, the poster child of post-industrial resilience.</p>
-            <p>Bookish kid → arts high school → <strong>Yale</strong> (Applied Math &amp; CS). Courses ranged from algorithms to art theory, organic chem to food writing.</p>
-          </div>
-        </div>
-        <span class="card-label">About Me</span>
-      </div>
-
-      <!-- WORK -->
-      <div class="flip-card card-work">
-        <div class="flip-inner">
-          <div class="flip-front">
-            <img src="../images/52060fb2-b59a-49d3-98a6-da7f88a2f202.png" alt="Housing illustration">
-            <div class="front-label">Work</div>
-          </div>
-          <div class="flip-back">
-            <h3>Professional</h3>
-            <p>I'm a <strong>data engineer</strong> for <strong>Airbnb.org</strong>, a disaster response and emergency housing non-profit.</p>
-            <p>Curious about our work or want to get involved? I'm always happy to chat about it.</p>
-          </div>
-        </div>
-        <span class="card-label">Work</span>
-      </div>
-
-      <!-- INTERESTS -->
-      <div class="flip-card card-interests">
-        <div class="flip-inner">
-          <div class="flip-front">
-            <img src="../images/f268e406-d850-4db7-abfb-c211891989b1.png" alt="Books and tea">
-            <div class="front-label">Interests</div>
-          </div>
-          <div class="flip-back">
-            <h3>What Lights Me Up</h3>
-            <p><strong>Sports:</strong> Running, tennis, soccer, pickleball, snowboarding, dance.</p>
-            <p><strong>Cooking:</strong> Working through Salt, Acid, Fat, Heat. But I've always liked baking more.</p>
-            <p><strong>Books:</strong> Pachinko, Everything I Never Told You, Chemistry, The Opposite of Loneliness.</p>
-          </div>
-        </div>
-        <span class="card-label">Interests</span>
-      </div>
-
-      <!-- WRITING -->
-      <div class="flip-card card-writing">
-        <div class="flip-inner">
-          <div class="flip-front">
-            <img src="../images/8efa115f-a27f-495a-850c-17374e7074d7.png" alt="Desert sunrise">
-            <div class="front-label">A Travel Excerpt</div>
-          </div>
-          <div class="flip-back">
-            <h3>Writing</h3>
-            <p style="font-style: italic; font-size: 0.65rem; line-height: 1.55;">"It was 5am and so dark I couldn't see my hands. Soon we reached the summit. A yellow haze emerged on the horizon and the sun sliced through the sky. Red sand as far as you could see..."</p>
-            <a href="#" style="font-size: 0.62rem;">Read more →</a>
-          </div>
-        </div>
-        <span class="card-label">Writing</span>
-      </div>
-
-      <!-- CONTACT -->
-      <div class="flip-card card-contact">
-        <div class="flip-inner">
-          <div class="flip-front">
-            <div class="postcard-img-side">✉️</div>
-            <div class="postcard-text-side">
-              <div class="postcard-stamp">🏛️</div>
-              <div class="postcard-lines">
-                <div class="postcard-line"></div>
-                <div class="postcard-line"></div>
-                <div class="postcard-line"></div>
-              </div>
-            </div>
-          </div>
-          <div class="flip-back">
-            <h3>Let's Talk</h3>
-            <p>Find this relatable? Or this layout offensive to your aesthetic senses?</p>
-            <div class="links">
-              <a href="#" class="link-btn">Twitter</a>
-              <a href="#" class="link-btn">LinkedIn</a>
-              <a href="#" class="link-btn">GitHub</a>
-              <a href="#" class="link-btn">Instagram</a>
-            </div>
-          </div>
-        </div>
-        <span class="card-label">Contact</span>
-      </div>
-
+  <!-- 02 ABOUT -->
+  <section class="section" id="about">
+    <div class="section-label">02 — about</div>
+    <h2 style="font-family:var(--serif);font-size:1.6rem;font-weight:400;margin-bottom:1.5rem;letter-spacing:-.02em">A bit about me</h2>
+    <div class="about-body">
+      <p>People often assume I'm from California — something about my monotonous voice and demeanor. But I grew up in <strong>Detroit</strong>, the poster child of post-industrial decline. I like being from such an underrated place. The food scene is amazing, and the history and auto museums are unmatched.</p>
+      <p>I was a bookish kid and went to an arts high school, where I discovered a liking for modern and contemporary art. I gave tours of Saarinen House, and I would love to return at some point. Later I went to college at <strong>Yale</strong>, studying Applied Math and Computer Science. I took courses ranging from algorithms to art theory, organic chemistry to food writing.</p>
+      <p>Did all this lead to an illustrious career as a mathematician or food blogger? Not quite.</p>
     </div>
-  </div>
+  </section>
 
-  <script>
-    const container = document.getElementById('container');
+  <!-- 03 WRITING -->
+  <section class="section" id="writing">
+    <div class="section-label">03 — writing</div>
+    <h2 style="font-family:var(--serif);font-size:1.6rem;font-weight:400;margin-bottom:1.5rem;letter-spacing:-.02em">Occasional writing</h2>
 
-    document.querySelectorAll('.flip-card').forEach(card => {
-      card.addEventListener('click', () => {
-        card.querySelector('.flip-inner').classList.toggle('flipped');
+    <a href="#" class="writing-card">
+      <div class="writing-card-image">
+        <img src="https://api.moda.app/api/v2/images/ref/cf82900f-7aa7-47bc-95c4-461c126be12a?v=937e9977" alt="Desert sunrise hike">
+      </div>
+      <div class="writing-card-body">
+        <div class="writing-card-label">Travel Excerpt</div>
+        <div class="writing-card-title">A Sunrise Hike</div>
+        <p class="writing-excerpt">"It was 5am and so dark I couldn't see my hands inches from my face. Half asleep, the chill air and cool sand gave gently with each step. Soon we reached the summit. A yellow haze emerged on the horizon and the sun sliced through the sky..."</p>
+        <span class="read-more">
+          Read more
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </span>
+      </div>
+    </a>
+
+    <div class="writing-list">
+      <div class="writing-row">
+        <div>
+          <div class="writing-row-title">On being a bookish kid in Detroit</div>
+          <div class="writing-row-desc">Libraries, Borders (RIP), and reading anything that caught my eye.</div>
+        </div>
+        <div class="writing-date">soon</div>
+      </div>
+      <div class="writing-row">
+        <div>
+          <div class="writing-row-title">What giving museum tours taught me</div>
+          <div class="writing-row-desc">Saarinen House, and why I'd love to go back.</div>
+        </div>
+        <div class="writing-date">soon</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 READING -->
+  <section class="section" id="reading">
+    <div class="section-label">04 — reading</div>
+    <h2 style="font-family:var(--serif);font-size:1.6rem;font-weight:400;margin-bottom:1rem;letter-spacing:-.02em">Books I've kept</h2>
+    <p class="reading-intro">Books have been a big part of my life. As a kid, I spent many weekends at the library and Borders (RIP) just reading anything that caught my eye. I tend to gravitate towards voices that validate my experience. Some favorites:</p>
+
+    <div class="books-grid">
+      <div class="book-item">
+        <div class="book-cover" style="background:#2A4A6A">
+          <div class="book-spine"></div>
+          <div class="book-cover-title">Pachinko</div>
+        </div>
+        <div class="book-author">Min Jin Lee</div>
+      </div>
+      <div class="book-item">
+        <div class="book-cover" style="background:#5A3A2A">
+          <div class="book-spine"></div>
+          <div class="book-cover-title">Everything I Never Told You</div>
+        </div>
+        <div class="book-author">Celeste Ng</div>
+      </div>
+      <div class="book-item">
+        <div class="book-cover" style="background:#2A4A3A">
+          <div class="book-spine"></div>
+          <div class="book-cover-title">Chemistry</div>
+        </div>
+        <div class="book-author">Weike Wang</div>
+      </div>
+      <div class="book-item">
+        <div class="book-cover" style="background:#4A2A4A">
+          <div class="book-spine"></div>
+          <div class="book-cover-title">The Opposite of Loneliness</div>
+        </div>
+        <div class="book-author">Marina Keegan</div>
+      </div>
+      <div class="book-item">
+        <div class="book-cover" style="background:#4A3A1A">
+          <div class="book-spine"></div>
+          <div class="book-cover-title">Salt, Fat, Acid, Heat</div>
+        </div>
+        <div class="book-author">Samin Nosrat</div>
+      </div>
+      <div class="book-item">
+        <div class="book-cover" style="background:#1A3A4A">
+          <div class="book-spine"></div>
+          <div class="book-cover-title">Add your own</div>
+        </div>
+        <div class="book-author">Your author</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 INTERESTS -->
+  <section class="section" id="interests">
+    <div class="section-label">05 — interests</div>
+    <h2 style="font-family:var(--serif);font-size:1.6rem;font-weight:400;margin-bottom:1rem;letter-spacing:-.02em">What lights me up —</h2>
+    <div class="interests-grid">
+      <span class="interest-tag">Running</span>
+      <span class="interest-tag">Tennis</span>
+      <span class="interest-tag">Snowboarding</span>
+      <span class="interest-tag">Dance</span>
+      <span class="interest-tag">Guitar</span>
+      <span class="interest-tag">Baking</span>
+      <span class="interest-tag">Museums</span>
+      <span class="interest-tag">Travel</span>
+      <span class="interest-tag">Modern Art</span>
+      <span class="interest-tag">Reading</span>
+    </div>
+  </section>
+
+  <!-- 06 CONTACT -->
+  <section class="section" id="contact">
+    <div class="section-label">06 — contact</div>
+    <h2 style="font-family:var(--serif);font-size:1.6rem;font-weight:400;margin-bottom:1rem;letter-spacing:-.02em">Let's talk</h2>
+    <p class="contact-intro">Find this relatable? Or this website layout offensive to your aesthetic senses? I'd love to hear from you.</p>
+
+    <div class="contact-links">
+      <a class="contact-link" href="https://twitter.com/yourhandle" target="_blank">
+        <div class="contact-link-left">
+          <div class="contact-link-icon">𝕏</div>
+          <div>
+            <div class="contact-link-name">Twitter / X</div>
+            <div class="contact-link-handle">@yourhandle</div>
+          </div>
+        </div>
+        <div class="contact-arrow">↗</div>
+      </a>
+      <a class="contact-link" href="https://linkedin.com/in/yourhandle" target="_blank">
+        <div class="contact-link-left">
+          <div class="contact-link-icon">💼</div>
+          <div>
+            <div class="contact-link-name">LinkedIn</div>
+            <div class="contact-link-handle">/in/yourhandle</div>
+          </div>
+        </div>
+        <div class="contact-arrow">↗</div>
+      </a>
+      <a class="contact-link" href="https://github.com/yourhandle" target="_blank">
+        <div class="contact-link-left">
+          <div class="contact-link-icon">🐙</div>
+          <div>
+            <div class="contact-link-name">GitHub</div>
+            <div class="contact-link-handle">/yourhandle</div>
+          </div>
+        </div>
+        <div class="contact-arrow">↗</div>
+      </a>
+      <a class="contact-link" href="https://instagram.com/yourhandle" target="_blank">
+        <div class="contact-link-left">
+          <div class="contact-link-icon">📸</div>
+          <div>
+            <div class="contact-link-name">Instagram</div>
+            <div class="contact-link-handle">@yourhandle</div>
+          </div>
+        </div>
+        <div class="contact-arrow">↗</div>
+      </a>
+      <a class="contact-link" href="mailto:your@email.com">
+        <div class="contact-link-left">
+          <div class="contact-link-icon">✉️</div>
+          <div>
+            <div class="contact-link-name">Email</div>
+            <div class="contact-link-handle">your@email.com</div>
+          </div>
+        </div>
+        <div class="contact-arrow">↗</div>
+      </a>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <span class="footer-copy">© 2025 Christiana Wong</span>
+    <span class="footer-copy">Made with curiosity</span>
+  </footer>
+
+</main>
+</div>
+
+<script>
+const sections = Array.from(document.querySelectorAll('.section[id]'));
+const navLinks  = Array.from(document.querySelectorAll('.nav-item a'));
+
+new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const id = e.target.id;
+      navLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + id));
+    }
+  });
+}, { rootMargin: '-30% 0px -60% 0px' }).observe
+? (() => {
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          navLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id));
+        }
       });
-    });
+    }, { rootMargin: '-30% 0px -60% 0px' });
+    sections.forEach(s => obs.observe(s));
+  })() : null;
 
-    let isDown = false, startX, scrollStart;
+new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('visible'); }
+  });
+}, { threshold: 0.08 })
+? (() => {
+    const rev = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) { e.target.classList.add('visible'); }
+      });
+    }, { threshold: 0.08 });
+    sections.forEach(s => { if (!s.classList.contains('visible')) rev.observe(s); });
+  })() : null;
 
-    container.addEventListener('mousedown', (e) => {
-      if (e.target.closest('.flip-card')) return;
-      isDown = true;
-      container.style.cursor = 'grabbing';
-      startX = e.pageX;
-      scrollStart = container.scrollLeft;
-    });
-
-    document.addEventListener('mouseup', () => {
-      isDown = false;
-      container.style.cursor = 'grab';
-    });
-
-    container.addEventListener('mousemove', (e) => {
-      if (!isDown) return;
-      e.preventDefault();
-      container.scrollLeft = scrollStart + (startX - e.pageX) * 1.5;
-    });
-
-    container.addEventListener('wheel', (e) => {
-      e.preventDefault();
-      container.scrollLeft += e.deltaY * 1.5;
-    }, { passive: false });
-
-    let touchStart = 0, touchScroll = 0;
-    container.addEventListener('touchstart', (e) => {
-      touchStart = e.touches[0].pageX;
-      touchScroll = container.scrollLeft;
-    }, { passive: true });
-
-    container.addEventListener('touchmove', (e) => {
-      container.scrollLeft = touchScroll + (touchStart - e.touches[0].pageX) * 1.2;
-    }, { passive: true });
-  </script>
-
-</body></html>
+navLinks.forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    document.querySelector(a.getAttribute('href'))?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+});
+</script>
+</body>
+</html>
