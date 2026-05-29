@@ -1,704 +1,1428 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Christy Wong</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-<style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html,body{width:100%;height:100%;overflow:hidden;background:#C8B888;cursor:none;font-family:'DM Sans',sans-serif}
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Christiana Wong</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&amp;family=DM+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --brand: #1390c6;
+      --brand-light: #e8f6fb;
+      --cream: #f5f0e8;
+      --warm-white: #fffdf9;
+      --stone: #c9bfb0;
+      --charcoal: #2d2926;
+      --terracotta: #a85638;
+      --brick: #8b4332;
+      --brick-light: #b86b5a;
+      --grass: #4a7a3a;
+      --grass-light: #6b9a5a;
+      --grass-mid: #5a8a4a;
+      --sky: #5a9fd4;
+      --sky-light: #8ac4e8;
+      --pool: #6ab4cc;
+      --pool-deep: #4a94ac;
+    }
 
-#cur{position:fixed;width:8px;height:8px;border-radius:50%;background:#2A1E0A;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width .15s,height .15s}
-#cur-ring{position:fixed;width:28px;height:28px;border-radius:50%;border:1px solid rgba(42,30,10,.4);pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:width .3s,height .3s}
-#cur.hov{width:36px;height:36px;background:rgba(42,30,10,.07);border:1px solid rgba(42,30,10,.25)}
-#cur-ring.hov{width:58px;height:58px;opacity:0}
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
-#world{position:fixed;inset:0;overflow:hidden}
-#track{position:absolute;top:0;left:0;height:100%;display:flex;align-items:flex-end;will-change:transform}
+    html, body {
+      overflow: hidden;
+      height: 100%;
+    }
 
-#sky{position:fixed;inset:0;z-index:0;background:linear-gradient(180deg,#5A9FD4 0%,#7AB8E4 18%,#A8D4F0 38%,#C8E8F8 55%,#DFF2FA 70%,#EEF8FC 85%,#F8FCFF 100%)}
-#sunglare{position:fixed;top:-120px;left:50%;transform:translateX(-50%);width:320px;height:320px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,240,.95) 0%,rgba(255,248,200,.5) 35%,transparent 65%);z-index:1;pointer-events:none;filter:blur(6px)}
+    body {
+      font-family: 'DM Sans', sans-serif;
+      color: var(--charcoal);
+    }
 
-#facade{position:fixed;bottom:0;left:0;width:600%;height:62%;z-index:2;will-change:transform;pointer-events:none}
-#ground{position:fixed;bottom:0;left:0;right:0;height:30%;z-index:3;background:linear-gradient(180deg,#D4C898 0%,#C0B07A 40%,#A89858 100%)}
-#ground::before{content:'';position:absolute;inset:0;background-image:repeating-linear-gradient(90deg,rgba(0,0,0,.04) 0,transparent 1px,transparent 80px,rgba(0,0,0,.04) 81px),repeating-linear-gradient(0deg,rgba(0,0,0,.04) 0,transparent 1px,transparent 40px,rgba(0,0,0,.04) 41px)}
-#ground::after{content:'';position:absolute;top:0;left:0;right:0;height:35%;background:linear-gradient(180deg,rgba(40,30,10,.18) 0%,transparent 100%)}
+    /* === 3D SCENE CONTAINER === */
+    .scene-container {
+      width: 100vw;
+      height: 100vh;
+      overflow-x: auto;
+      overflow-y: hidden;
+      cursor: grab;
+      scrollbar-width: none;
+      perspective: 1000px;
+      perspective-origin: 50% 80%;
+    }
 
-#lawns{position:fixed;bottom:0;left:0;width:600%;height:30%;z-index:4;pointer-events:none;will-change:transform}
+    .scene-container::-webkit-scrollbar { display: none; }
+    .scene-container:active { cursor: grabbing; }
 
-#fountain{position:fixed;bottom:28%;z-index:5;pointer-events:none;will-change:left}
+    /* === SKY === */
+    .sky {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 38vh;
+      background: linear-gradient(180deg, 
+        #2a6aa8 0%, 
+        #4a8ac8 25%,
+        var(--sky) 50%, 
+        var(--sky-light) 80%,
+        #d0e4f0 100%);
+      z-index: 0;
+    }
 
-.obj-wrap{position:relative;flex:0 0 auto;pointer-events:all;display:flex;align-items:flex-end;justify-content:center}
-.spacer{flex:0 0 auto;pointer-events:none}
+    .cloud {
+      position: fixed;
+      background: rgba(255, 255, 255, 0.92);
+      border-radius: 100px;
+      z-index: 1;
+      filter: blur(1px);
+    }
 
-.obj{position:relative;transform-style:preserve-3d;transition:transform .72s cubic-bezier(.4,0,.2,1);cursor:none}
+    .cloud::before, .cloud::after {
+      content: '';
+      position: absolute;
+      background: inherit;
+      border-radius: 50%;
+    }
 
-.obj-face{backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:4px;overflow:hidden}
-.obj-back{position:absolute;top:0;left:0;right:0;bottom:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;transform:rotateY(180deg);background:rgba(250,246,236,.97);border:1.5px solid rgba(180,160,100,.45);border-radius:4px;padding:1.3rem 1.5rem;display:flex;flex-direction:column;justify-content:center;box-shadow:0 12px 40px rgba(40,30,10,.22),0 0 0 1px rgba(255,252,240,.5) inset}
+    .cloud-1 { width: 140px; height: 40px; top: 4vh; left: 5%; }
+    .cloud-1::before { width: 55px; height: 55px; top: -28px; left: 22px; }
+    .cloud-1::after { width: 70px; height: 70px; top: -35px; left: 55px; }
 
-/* ── EXPANDED / CLICKED STATE ── */
-/* Backdrop */
-#backdrop{
-  position:fixed;inset:0;z-index:50;
-  background:rgba(30,20,8,.55);
-  backdrop-filter:blur(3px);
-  opacity:0;pointer-events:none;
-  transition:opacity .4s ease;
-}
-#backdrop.on{opacity:1;pointer-events:all}
+    .cloud-2 { width: 100px; height: 30px; top: 7vh; left: 45%; }
+    .cloud-2::before { width: 40px; height: 40px; top: -20px; left: 18px; }
+    .cloud-2::after { width: 50px; height: 50px; top: -25px; left: 45px; }
 
-/* The expanded card — centred fixed overlay */
-.obj-wrap.expanded{
-  position:fixed;
-  z-index:60;
-  pointer-events:all;
-  /* centred by JS */
-  align-items:center;
-  justify-content:center;
-}
+    .cloud-3 { width: 80px; height: 25px; top: 3vh; left: 75%; }
+    .cloud-3::before { width: 35px; height: 35px; top: -18px; left: 12px; }
+    .cloud-3::after { width: 42px; height: 42px; top: -21px; left: 38px; }
 
-/* When expanded, the inner .obj is flipped AND scaled up */
-.obj-wrap.expanded .obj{
-  transform:rotateY(180deg) scale(1);
-  /* actual scale applied via JS inline so we can size to content */
-}
+    /* === 3D GROUND PLANE === */
+    .ground-3d {
+      position: fixed;
+      bottom: 0;
+      left: -100%;
+      width: 300%;
+      height: 70vh;
+      background: linear-gradient(180deg, 
+        #7db36a 0%,
+        var(--grass-light) 15%,
+        var(--grass-mid) 40%,
+        var(--grass) 100%);
+      transform: rotateX(60deg);
+      transform-origin: center bottom;
+      z-index: 2;
+    }
 
-/* Expanded back gets more generous padding and bigger text */
-.obj-wrap.expanded .obj-back{
-  padding:2rem 2.4rem;
-  overflow-y:auto;
-}
-.obj-wrap.expanded .back-title{font-size:clamp(1.3rem,2vw,1.9rem)}
-.obj-wrap.expanded .back-body{font-size:.85rem}
-.obj-wrap.expanded .mini-card-t{font-size:1rem}
-.obj-wrap.expanded .wrow-t{font-size:.98rem}
-.obj-wrap.expanded .ig-icon,.obj-wrap.expanded .mgcell{font-size:1.4rem}
+    .ground-3d::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image: 
+        radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px),
+        radial-gradient(circle, rgba(0,0,0,0.04) 1px, transparent 1px);
+      background-size: 15px 30px, 20px 40px;
+      background-position: 0 0, 10px 15px;
+    }
 
-/* Close button */
-#close-btn{
-  position:fixed;top:1.6rem;right:1.8rem;
-  z-index:70;
-  width:36px;height:36px;border-radius:50%;
-  background:rgba(248,244,236,.9);
-  border:1px solid rgba(180,160,100,.4);
-  display:none;align-items:center;justify-content:center;
-  font-size:16px;color:#5A4A2A;
-  cursor:none;
-  transition:background .2s,transform .15s;
-  box-shadow:0 4px 16px rgba(40,30,10,.18);
-}
-#close-btn.on{display:flex}
-#close-btn:hover{background:rgba(255,252,240,1);transform:scale(1.08)}
+    /* Grass surface overlay for proper z-index */
+    .grass-overlay {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 62vh;
+      background: linear-gradient(180deg, 
+        transparent 0%,
+        rgba(107, 154, 90, 0.3) 10%,
+        var(--grass-light) 25%,
+        var(--grass-mid) 50%,
+        var(--grass) 100%);
+      z-index: 3;
+      pointer-events: none;
+    }
 
-.back-tag{font-size:9px;font-weight:500;letter-spacing:.22em;text-transform:uppercase;color:var(--ac,#C8960A);margin-bottom:.55rem;display:flex;align-items:center;gap:6px}
-.back-tag::after{content:'';flex:0 0 22px;height:1px;background:var(--ac,#C8960A);opacity:.4}
-.back-title{font-family:'Cormorant Garamond',serif;font-size:clamp(1rem,1.5vw,1.45rem);font-weight:400;color:#2A1E0A;line-height:1.2;margin-bottom:.45rem}
-.back-title em{font-style:italic;color:var(--ac,#C8960A)}
-.back-body{font-size:.76rem;font-weight:300;color:#5A4A2A;line-height:1.75;margin-bottom:.5rem}
-.chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:.4rem}
-.chip{font-size:9px;letter-spacing:.07em;padding:2px 8px;border:1px solid rgba(180,160,100,.3);border-radius:2px;color:#6A5A3A;background:rgba(180,160,100,.08);text-transform:uppercase}
+    /* === BUILDING FACADE (in distance) === */
+    .facade-back {
+      position: fixed;
+      top: 5vh;
+      left: 50%;
+      transform: translateX(-50%) perspective(800px) rotateX(2deg);
+      width: 92vw;
+      height: 33vh;
+      background: linear-gradient(180deg, var(--brick) 0%, var(--terracotta) 65%, var(--brick-light) 100%);
+      z-index: 4;
+      border-radius: 0 0 4px 4px;
+      box-shadow: 0 15px 50px rgba(0,0,0,0.3);
+    }
 
-.mini-card{background:rgba(180,160,100,.07);border-left:2px solid var(--ac,#C8960A);padding:.35rem .6rem;margin-bottom:.35rem;border-radius:0 2px 2px 0}
-.mini-card:last-child{margin-bottom:0}
-.mini-card-t{font-family:'Cormorant Garamond',serif;font-size:.85rem;color:#2A1E0A;margin-bottom:1px}
-.mini-card-d{font-size:.7rem;color:#7A6A4A;line-height:1.5}
+    .window-row {
+      position: absolute;
+      bottom: 10%;
+      left: 3%;
+      right: 3%;
+      display: flex;
+      justify-content: space-around;
+    }
 
-.wrow{border-bottom:1px solid rgba(180,160,100,.15);padding:.3rem 0}
-.wrow:last-child{border-bottom:none}
-.wrow-t{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.85rem;color:#2A1E0A}
-.wrow-m{font-size:9px;letter-spacing:.07em;text-transform:uppercase;color:#8A7A5A}
+    .arch-win {
+      width: 50px;
+      height: 90px;
+      background: linear-gradient(180deg, #1a2530 0%, #0f1820 100%);
+      border-radius: 25px 25px 0 0;
+      position: relative;
+      box-shadow: inset 0 0 15px rgba(0,0,0,0.5);
+    }
 
-.mini-gallery{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-top:.45rem}
-.mgcell{aspect-ratio:1;border-radius:2px;background:rgba(180,160,100,.1);border:1px solid rgba(180,160,100,.18);display:flex;align-items:center;justify-content:center;font-size:.95rem}
+    .arch-win::before {
+      content: '';
+      position: absolute;
+      top: -6px; left: -6px; right: -6px; bottom: -2px;
+      border: 6px solid #d4a574;
+      border-radius: 31px 31px 0 0;
+    }
 
-.clink{display:flex;align-items:center;gap:8px;font-size:.78rem;color:#5A4A2A;padding:.3rem 0;border-bottom:1px solid rgba(180,160,100,.12);text-decoration:none;cursor:pointer;transition:color .2s}
-.clink:last-child{border-bottom:none}
-.clink:hover{color:#2A1E0A}
-.clink-icon{width:22px;height:22px;border-radius:50%;background:rgba(180,160,100,.12);display:flex;align-items:center;justify-content:center;font-size:.78rem;flex-shrink:0}
+    .arch-win::after {
+      content: '';
+      position: absolute;
+      top: 8%; left: 12%;
+      width: 22%; height: 28%;
+      background: linear-gradient(135deg, rgba(150, 200, 255, 0.2) 0%, transparent 100%);
+      border-radius: 10px 10px 0 0;
+    }
 
-.obj-hint{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);margin-bottom:8px;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:rgba(42,30,10,.45);white-space:nowrap;opacity:0;transition:opacity .3s;pointer-events:none}
-.obj-wrap:hover .obj-hint{opacity:1}
+    .frieze {
+      position: absolute;
+      top: 5%;
+      left: 0; right: 0;
+      height: 18px;
+      background: linear-gradient(180deg, #d4a574 0%, #c49464 50%, #b48454 100%);
+      border-top: 2px solid #6b3528;
+      border-bottom: 2px solid #6b3528;
+    }
 
-/* ── HERO SLAB ── */
-.slab-face{width:220px;height:310px;background:linear-gradient(155deg,#E0D8C0 0%,#C8BF9E 40%,#B4A870 100%);border-radius:3px 3px 2px 2px;border:2px solid #A89858;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:6px 8px 24px rgba(40,30,10,.28),inset 0 1px 0 rgba(255,255,240,.35);position:relative}
-.slab-crack{position:absolute;top:0;left:0;right:0;bottom:0;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='310'%3E%3Cpath d='M80,0 Q84,80 76,160 Q72,220 82,310' stroke='rgba(100,80,40,.12)' stroke-width='1' fill='none'/%3E%3Cpath d='M140,0 Q144,60 148,130 Q152,200 146,310' stroke='rgba(100,80,40,.08)' stroke-width='.7' fill='none'/%3E%3C/svg%3E")}
-.slab-name{font-family:'Cormorant Garamond',serif;font-size:2.2rem;font-weight:300;color:#2A1E0A;letter-spacing:.05em;line-height:1.05;text-align:center;position:relative;z-index:1}
-.slab-rule{width:55px;height:1px;background:#A89858;margin:9px auto}
-.slab-sub{font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:#6A5A3A;text-align:center;position:relative;z-index:1}
-.slab-ornament{font-size:1.6rem;opacity:.14;position:absolute;bottom:16px;left:50%;transform:translateX(-50%)}
+    .pediment {
+      position: absolute;
+      top: -5vh;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0; height: 0;
+      border-left: 10vw solid transparent;
+      border-right: 10vw solid transparent;
+      border-bottom: 5vh solid var(--brick);
+    }
 
-/* bench */
-.bench-seat{width:190px;height:26px;background:linear-gradient(180deg,#A06830 0%,#7A4C1C 60%,#603A0C 100%);border-radius:3px 3px 0 0;border:1px solid #522A08;box-shadow:2px 3px 8px rgba(40,20,0,.28);position:relative}
-.bench-seat::after{content:'';position:absolute;top:5px;left:10px;right:10px;height:2px;background:rgba(255,210,120,.12);border-radius:1px}
-.bench-legs{width:170px;height:36px;display:flex;justify-content:space-between;padding:0 14px}
-.bench-leg{width:9px;background:linear-gradient(180deg,#7A4820 0%,#522A08 100%);border-radius:0 0 3px 3px}
+    .cornice-back {
+      position: absolute;
+      bottom: 0;
+      left: 0; right: 0;
+      height: 15px;
+      background: linear-gradient(180deg, #e0d4c4 0%, #c9bfb0 100%);
+    }
 
-/* urn */
-.urn-stack{display:flex;flex-direction:column;align-items:center;gap:0}
-.urn-plant{font-size:1.9rem;line-height:1;margin-bottom:-4px}
-.urn-neck{width:38px;height:20px;background:linear-gradient(180deg,#C8BC90 0%,#A89860 100%);border-radius:4px 4px 0 0;border:1px solid #9A8860;margin-bottom:-1px}
-.urn-body{width:88px;height:105px;background:linear-gradient(155deg,#D4C8A0 0%,#B8AA78 50%,#9A8E60 100%);border-radius:50% 50% 35% 35% / 30% 30% 50% 50%;border:1.5px solid #9A8860;box-shadow:4px 6px 16px rgba(40,30,10,.28),inset -4px -4px 12px rgba(0,0,0,.09),inset 2px 2px 8px rgba(255,255,200,.12)}
-.urn-base{width:66px;height:11px;background:linear-gradient(180deg,#C0B080 0%,#A09058 100%);border-radius:2px;border:1px solid #8A7A50}
+    /* Side walls with strong perspective */
+    .facade-left {
+      position: fixed;
+      top: 8vh;
+      left: 0;
+      height: 42vh;
+      width: 18vw;
+      background: linear-gradient(90deg, var(--brick) 0%, var(--terracotta) 100%);
+      transform: perspective(600px) rotateY(35deg);
+      transform-origin: left center;
+      z-index: 3;
+    }
 
-/* easel */
-.easel-frame{width:120px;height:148px;background:linear-gradient(155deg,#F0E8D0 0%,#E0D0B0 100%);border:7px solid #7A5820;border-radius:2px;box-shadow:3px 4px 12px rgba(40,30,10,.28);display:flex;align-items:center;justify-content:center;font-size:2.6rem;position:relative;overflow:hidden}
-.easel-frame::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,240,.18) 0%,transparent 50%)}
-.easel-legs{margin-top:-3px;width:120px;height:36px;position:relative}
-.easel-leg{position:absolute;bottom:0;width:5px;background:linear-gradient(180deg,#7A5820 0%,#5A3A10 100%);border-radius:0 0 2px 2px}
-.easel-leg-l{left:18px;height:36px;transform:rotate(6deg);transform-origin:top center}
-.easel-leg-m{left:50%;transform:translateX(-50%);height:30px}
-.easel-leg-r{right:18px;height:36px;transform:rotate(-6deg);transform-origin:top center}
+    .facade-right {
+      position: fixed;
+      top: 8vh;
+      right: 0;
+      height: 42vh;
+      width: 18vw;
+      background: linear-gradient(-90deg, var(--brick) 0%, var(--terracotta) 100%);
+      transform: perspective(600px) rotateY(-35deg);
+      transform-origin: right center;
+      z-index: 3;
+    }
 
-/* globe */
-.globe-sphere{width:86px;height:86px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#6AAAD0 0%,#3A7AA0 40%,#1A5A80 70%,#0A3A60 100%);border:2px solid #1A5A80;box-shadow:4px 6px 18px rgba(40,30,10,.32),inset -8px -8px 20px rgba(0,0,0,.22),inset 4px 4px 12px rgba(255,255,255,.12);position:relative;overflow:hidden}
-.globe-land{position:absolute;background:rgba(80,150,60,.45);border-radius:4px}
-.globe-stand-neck{width:14px;height:14px;background:#A89858;border-radius:50% 50% 0 0;margin:0 auto}
-.globe-stand-base{width:64px;height:12px;background:linear-gradient(180deg,#C0AA70 0%,#9A8848 100%);border-radius:3px;border:1px solid #7A6838;box-shadow:1px 2px 6px rgba(40,30,10,.18)}
+    /* === STEPPED FOUNTAIN (3D perspective) === */
+    .fountain {
+      position: fixed;
+      bottom: 28vh;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+    }
 
-/* scope */
-.scope-barrel{width:115px;height:30px;background:linear-gradient(180deg,#8A7840 0%,#6A5A28 50%,#4A3A18 100%);border-radius:15px 4px 4px 15px;border:1px solid #4A3A18;box-shadow:2px 4px 10px rgba(40,30,10,.28);position:relative}
-.scope-barrel::before{content:'';position:absolute;top:7px;left:14px;right:28px;height:5px;background:rgba(255,230,120,.12);border-radius:3px}
-.scope-barrel::after{content:'';position:absolute;top:7px;right:0;width:16px;height:16px;background:#7A6830;border-radius:50%;border:1px solid #4A3A18}
-.scope-tripod{width:76px;height:50px;position:relative}
-.scope-leg{position:absolute;bottom:0;width:5px;background:linear-gradient(180deg,#6A5A28 0%,#4A3A18 100%);border-radius:0 0 2px 2px}
-.scope-leg-a{left:8px;height:50px;transform:rotate(8deg);transform-origin:top center}
-.scope-leg-b{left:50%;transform:translateX(-50%);height:42px}
-.scope-leg-c{right:8px;height:50px;transform:rotate(-8deg);transform-origin:top center}
+    .fountain-step {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%) rotateX(25deg);
+      transform-style: preserve-3d;
+      border-radius: 50%;
+    }
 
-/* teapot */
-.teapot-body{width:66px;height:54px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#E8E0D0 0%,#C8C0A0 50%,#A8A080 100%);border:1.5px solid #9A9070;box-shadow:3px 4px 12px rgba(40,30,10,.22),inset -4px -4px 10px rgba(0,0,0,.07),inset 2px 2px 6px rgba(255,255,240,.28);position:relative}
-.teapot-spout{position:absolute;left:-20px;top:13px;width:26px;height:13px;background:linear-gradient(90deg,#B8B090 0%,#C8C0A0 100%);border-radius:8px 13px 10px 4px;border:1px solid #9A9070;transform:rotate(-15deg)}
-.teapot-handle{position:absolute;right:-16px;top:8px;width:19px;height:26px;border-radius:0 50% 50% 0;border:3.5px solid #A8A080;border-left:none}
-.teapot-lid{position:absolute;top:-9px;left:50%;transform:translateX(-50%);width:28px;height:11px;background:linear-gradient(180deg,#D8D0B0 0%,#B8B090 100%);border-radius:4px 4px 0 0;border:1px solid #9A9070}
-.teapot-knob{position:absolute;top:-15px;left:50%;transform:translateX(-50%);width:7px;height:7px;border-radius:50%;background:#C8C0A0;border:1px solid #9A9070}
-.tea-saucer{width:76px;height:9px;border-radius:50%;background:linear-gradient(180deg,#D8D0B0 0%,#A8A080 100%);border:1px solid #9A9070;box-shadow:1px 2px 8px rgba(40,30,10,.18)}
+    .step-1 {
+      width: 380px;
+      height: 100px;
+      bottom: 0;
+      background: linear-gradient(180deg, 
+        #f0e8dc 0%, 
+        #e0d8cc 20%,
+        #c9c0b4 60%,
+        #b8b0a4 100%);
+      box-shadow: 
+        0 8px 0 #a8a090,
+        0 12px 25px rgba(0,0,0,0.2);
+    }
 
-/* books */
-.book{border-radius:2px 2px 1px 1px;position:relative;box-shadow:2px 3px 8px rgba(40,30,10,.18)}
+    .step-2 {
+      width: 320px;
+      height: 85px;
+      bottom: 18px;
+      background: linear-gradient(180deg, 
+        #e8e0d4 0%,
+        #d8d0c4 30%,
+        #c0b8ac 100%);
+      box-shadow: 
+        0 6px 0 #a0988c,
+        0 10px 20px rgba(0,0,0,0.15);
+    }
 
-/* interest mini grid */
-.ig{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:.45rem}
-.ig-cell{background:rgba(90,56,160,.05);border:1px solid rgba(90,56,160,.1);border-radius:2px;padding:.35rem;text-align:center}
-.ig-icon{font-size:1.15rem;display:block;margin-bottom:2px}
-.ig-lbl{font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:#5A4A2A}
+    .step-3 {
+      width: 260px;
+      height: 70px;
+      bottom: 34px;
+      background: linear-gradient(180deg, 
+        #e0d8cc 0%,
+        #d0c8bc 30%,
+        #b8b0a4 100%);
+      box-shadow: 
+        0 5px 0 #98908c,
+        0 8px 15px rgba(0,0,0,0.12);
+    }
 
-#nav{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);z-index:100;display:flex;gap:8px;align-items:center}
-.dot{width:6px;height:6px;border-radius:50%;background:rgba(42,30,10,.2);border:1px solid rgba(42,30,10,.32);cursor:pointer;transition:all .3s}
-.dot.on{background:#2A1E0A;width:18px;border-radius:3px}
+    .step-4 {
+      width: 200px;
+      height: 55px;
+      bottom: 48px;
+      background: linear-gradient(180deg, 
+        #d8d0c4 0%,
+        #c8c0b4 30%,
+        #b0a89c 100%);
+      box-shadow: 
+        0 4px 0 #908880,
+        0 6px 12px rgba(0,0,0,0.1);
+    }
 
-#sec-label{position:fixed;top:2rem;left:50%;transform:translateX(-50%);z-index:100;font-size:9px;letter-spacing:.25em;text-transform:uppercase;color:rgba(42,30,10,.42);transition:opacity .4s;white-space:nowrap}
+    .water {
+      position: absolute;
+      width: 150px;
+      height: 42px;
+      bottom: 62px;
+      left: 50%;
+      transform: translateX(-50%) rotateX(25deg);
+      background: linear-gradient(180deg, 
+        #8cc8dc 0%,
+        var(--pool) 40%,
+        var(--pool-deep) 100%);
+      border-radius: 50%;
+      box-shadow: 
+        inset 0 5px 20px rgba(0,0,0,0.2),
+        inset 0 -3px 10px rgba(255,255,255,0.15);
+      overflow: hidden;
+    }
 
-#hint{position:fixed;right:2.5rem;bottom:2rem;z-index:100;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:rgba(42,30,10,.42);display:flex;align-items:center;gap:6px;animation:hf 5s ease 1.5s both}
-@keyframes hf{0%{opacity:0}15%{opacity:1}80%{opacity:1}100%{opacity:0;pointer-events:none}}
-.ha{animation:hm 1.5s ease-in-out infinite}
-@keyframes hm{0%,100%{transform:translateX(0)}50%{transform:translateX(8px)}}
+    .water::before {
+      content: '';
+      position: absolute;
+      top: 8%; left: 15%;
+      width: 40%; height: 35%;
+      background: linear-gradient(180deg, rgba(255,255,255,0.4) 0%, transparent 100%);
+      border-radius: 50%;
+    }
 
-@keyframes jet{0%,100%{transform:scaleY(1) translateY(0);opacity:.8}50%{transform:scaleY(1.06) translateY(-2px);opacity:1}}
-@keyframes shimmer{0%,100%{opacity:.14}50%{opacity:.28}}
-</style>
-</head>
+    .ripple {
+      position: absolute;
+      border: 1px solid rgba(255,255,255,0.5);
+      border-radius: 50%;
+      animation: ripple 2.5s ease-out infinite;
+    }
+
+    .ripple:nth-child(1) { width: 20px; height: 8px; top: 40%; left: 25%; }
+    .ripple:nth-child(2) { width: 30px; height: 12px; top: 35%; left: 50%; animation-delay: 0.8s; }
+    .ripple:nth-child(3) { width: 18px; height: 7px; top: 50%; left: 30%; animation-delay: 1.6s; }
+
+    @keyframes ripple {
+      0% { transform: scale(0.6); opacity: 0.7; }
+      100% { transform: scale(1.5); opacity: 0; }
+    }
+
+    /* === CONTENT LAYER === */
+    .content-layer {
+      position: relative;
+      width: 400vw;
+      height: 100vh;
+      z-index: 20;
+    }
+
+    /* === 3D FURNITURE === */
+
+    /* Bistro Chair - 3D with seat depth */
+    .chair-3d {
+      position: absolute;
+      z-index: 15;
+      transform-style: preserve-3d;
+    }
+
+    .chair-3d-seat {
+      width: 32px;
+      height: 16px;
+      background: linear-gradient(180deg, #4a4540 0%, #3a3530 100%);
+      border-radius: 3px;
+      transform: rotateX(50deg);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+
+    .chair-3d-back {
+      width: 28px;
+      height: 32px;
+      background: linear-gradient(180deg, #5a5550 0%, #4a4540 50%, #3a3530 100%);
+      border-radius: 4px 4px 0 0;
+      position: absolute;
+      bottom: 12px;
+      left: 2px;
+      transform: rotateX(-10deg);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+
+    .chair-3d-back::before {
+      content: '';
+      position: absolute;
+      top: 4px; left: 3px; right: 3px; bottom: 4px;
+      border: 2px solid rgba(255,255,255,0.1);
+      border-radius: 3px;
+    }
+
+    .chair-3d-legs {
+      position: absolute;
+      bottom: -12px;
+      left: 3px;
+      width: 26px;
+      height: 12px;
+    }
+
+    .chair-leg {
+      position: absolute;
+      width: 3px;
+      height: 12px;
+      background: linear-gradient(180deg, #3a3530 0%, #2a2520 100%);
+      border-radius: 0 0 1px 1px;
+    }
+
+    .chair-leg:nth-child(1) { left: 0; }
+    .chair-leg:nth-child(2) { right: 0; }
+    .chair-leg:nth-child(3) { left: 0; top: -4px; height: 8px; }
+    .chair-leg:nth-child(4) { right: 0; top: -4px; height: 8px; }
+
+    /* Bistro Table - 3D */
+    .table-3d {
+      position: absolute;
+      z-index: 16;
+      transform-style: preserve-3d;
+    }
+
+    .table-3d-top {
+      width: 48px;
+      height: 24px;
+      background: radial-gradient(ellipse at 30% 30%, #ffffff 0%, #f5f0e8 30%, #e0d8cc 100%);
+      border-radius: 50%;
+      transform: rotateX(50deg);
+      box-shadow: 
+        0 2px 0 #c9c0b4,
+        0 4px 0 #b8b0a4,
+        0 8px 15px rgba(0,0,0,0.25);
+      border: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .table-3d-leg {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 5px;
+      height: 22px;
+      background: linear-gradient(90deg, #2a2520 0%, #4a4540 50%, #2a2520 100%);
+      border-radius: 2px;
+    }
+
+    .table-3d-base {
+      position: absolute;
+      top: 30px;
+      left: 50%;
+      transform: translateX(-50%) rotateX(50deg);
+      width: 28px;
+      height: 14px;
+      background: linear-gradient(180deg, #3a3530 0%, #2a2520 100%);
+      border-radius: 50%;
+    }
+
+    /* Lounge Chair - 3D wooden slats */
+    .lounge-3d {
+      position: absolute;
+      z-index: 14;
+      transform-style: preserve-3d;
+    }
+
+    .lounge-3d-base {
+      width: 70px;
+      height: 20px;
+      background: repeating-linear-gradient(
+        90deg,
+        #d4a060 0px,
+        #d4a060 5px,
+        #c49050 5px,
+        #c49050 6px,
+        transparent 6px,
+        transparent 8px
+      );
+      transform: rotateX(45deg);
+      border-radius: 3px;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.25);
+    }
+
+    .lounge-3d-back {
+      position: absolute;
+      bottom: 15px;
+      left: -5px;
+      width: 30px;
+      height: 40px;
+      background: repeating-linear-gradient(
+        0deg,
+        #d4a060 0px,
+        #d4a060 4px,
+        #c49050 4px,
+        #c49050 5px,
+        transparent 5px,
+        transparent 7px
+      );
+      transform: rotateY(15deg) rotateX(-20deg);
+      transform-origin: bottom left;
+      border-radius: 3px 3px 0 0;
+      box-shadow: -3px 3px 8px rgba(0,0,0,0.15);
+    }
+
+    .lounge-3d-frame {
+      position: absolute;
+      bottom: -8px;
+      left: 8px;
+      right: 8px;
+      height: 8px;
+      background: linear-gradient(180deg, #6a6560 0%, #4a4540 100%);
+      border-radius: 2px;
+      transform: rotateX(30deg);
+    }
+
+    /* Statue - 3D */
+    .statue-3d {
+      position: absolute;
+      z-index: 17;
+      transform-style: preserve-3d;
+    }
+
+    .statue-plinth {
+      width: 35px;
+      height: 12px;
+      background: linear-gradient(180deg, #e0d8cc 0%, #c0b8ac 50%, #a8a090 100%);
+      transform: rotateX(40deg);
+      border-radius: 2px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+
+    .statue-figure {
+      position: absolute;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 18px;
+      height: 50px;
+      background: linear-gradient(90deg, #b8b0a4 0%, #e0d8cc 40%, #d0c8bc 70%, #b0a89c 100%);
+      border-radius: 9px 9px 4px 4px;
+      box-shadow: 3px 0 10px rgba(0,0,0,0.15);
+    }
+
+    .statue-figure::before {
+      content: '';
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 14px;
+      height: 14px;
+      background: radial-gradient(circle at 35% 35%, #e8e0d4 0%, #c8c0b4 100%);
+      border-radius: 50%;
+    }
+
+    /* People - 3D */
+    .person-3d {
+      position: absolute;
+      z-index: 18;
+      transform-style: preserve-3d;
+    }
+
+    .person-3d-head {
+      width: 12px;
+      height: 12px;
+      background: radial-gradient(circle at 35% 35%, #f5dcc8 0%, #d8c0a8 100%);
+      border-radius: 50%;
+      margin: 0 auto 2px;
+      box-shadow: 1px 1px 3px rgba(0,0,0,0.15);
+    }
+
+    .person-3d-body {
+      width: 16px;
+      height: 26px;
+      border-radius: 8px 8px 4px 4px;
+      margin: 0 auto;
+      box-shadow: 2px 2px 6px rgba(0,0,0,0.2);
+    }
+
+    .person-3d-legs {
+      display: flex;
+      justify-content: center;
+      gap: 3px;
+    }
+
+    .person-3d-leg {
+      width: 5px;
+      height: 16px;
+      border-radius: 0 0 2px 2px;
+      box-shadow: 1px 1px 3px rgba(0,0,0,0.15);
+    }
+
+    /* Dog - 3D */
+    .dog-3d {
+      position: absolute;
+      z-index: 17;
+      transform-style: preserve-3d;
+    }
+
+    .dog-3d-body {
+      width: 30px;
+      height: 14px;
+      background: linear-gradient(180deg, #b8946c 0%, #987454 50%, #785434 100%);
+      border-radius: 7px;
+      box-shadow: 2px 2px 6px rgba(0,0,0,0.25);
+      position: relative;
+    }
+
+    .dog-3d-head {
+      position: absolute;
+      left: -10px;
+      top: -2px;
+      width: 16px;
+      height: 14px;
+      background: radial-gradient(ellipse at 40% 40%, #b8946c 0%, #987454 100%);
+      border-radius: 8px 5px 5px 8px;
+      box-shadow: -1px 1px 4px rgba(0,0,0,0.15);
+    }
+
+    .dog-3d-head::before {
+      content: '';
+      position: absolute;
+      right: 4px;
+      top: 4px;
+      width: 3px;
+      height: 3px;
+      background: #1a1a1a;
+      border-radius: 50%;
+    }
+
+    .dog-3d-head::after {
+      content: '';
+      position: absolute;
+      right: 1px;
+      top: 8px;
+      width: 4px;
+      height: 2px;
+      background: #2a2a2a;
+      border-radius: 2px;
+    }
+
+    .dog-3d-tail {
+      position: absolute;
+      right: -8px;
+      top: -3px;
+      width: 10px;
+      height: 4px;
+      background: #987454;
+      border-radius: 4px;
+      transform: rotate(-25deg);
+    }
+
+    .dog-3d-legs {
+      position: absolute;
+      bottom: -7px;
+      left: 3px;
+      right: 3px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .dog-3d-leg {
+      width: 4px;
+      height: 7px;
+      background: linear-gradient(180deg, #785434 0%, #583414 100%);
+      border-radius: 0 0 2px 2px;
+    }
+
+    /* Ball - 3D */
+    .ball-3d {
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      background: radial-gradient(circle at 30% 30%, #ff9090 0%, #e04040 60%, #a02020 100%);
+      border-radius: 50%;
+      box-shadow: 
+        2px 3px 8px rgba(0,0,0,0.3),
+        inset -2px -2px 4px rgba(0,0,0,0.2);
+      z-index: 16;
+    }
+
+    /* === FLIP CARDS === */
+    .flip-card {
+      position: absolute;
+      perspective: 1000px;
+      cursor: pointer;
+      z-index: 25;
+      transition: transform 0.2s ease;
+    }
+
+    .flip-card:hover { transform: translateY(-5px) scale(1.02); }
+
+    .flip-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.65s cubic-bezier(0.4, 0, 0.2, 1);
+      transform-style: preserve-3d;
+    }
+
+    .flip-card:hover .flip-inner:not(.flipped) { transform: rotateY(180deg); }
+    .flip-inner.flipped { transform: rotateY(180deg); }
+
+    .flip-front, .flip-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .flip-front {
+      box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+    }
+
+    .flip-back {
+      transform: rotateY(180deg);
+      background: var(--warm-white);
+      box-shadow: 0 12px 45px rgba(0,0,0,0.35);
+      padding: 1rem;
+      box-sizing: border-box;
+      overflow-y: auto;
+    }
+
+    /* Card styles */
+    .card-about {
+      bottom: 42vh;
+      left: 10vw;
+      width: 140px;
+      height: 175px;
+    }
+
+    .card-about .flip-front {
+      background: linear-gradient(145deg, #c9a86c 0%, #a67c52 100%);
+      padding: 7px;
+    }
+
+    .card-about .front-inner {
+      width: 100%;
+      height: 100%;
+      border-radius: 5px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .card-about .front-inner img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .card-about .front-inner .label {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(transparent, rgba(0,0,0,0.75));
+      padding: 22px 10px 10px;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.9rem;
+      font-style: italic;
+      color: white;
+      text-align: center;
+    }
+
+    .card-work {
+      bottom: 32vh;
+      left: 65vw;
+      width: 150px;
+      height: 115px;
+    }
+
+    .card-work .flip-front {
+      background: white;
+    }
+
+    .card-work .flip-front img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .card-work .front-label {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      background: rgba(255,255,255,0.95);
+      padding: 5px 12px;
+      border-radius: 5px;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--charcoal);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .card-interests {
+      bottom: 38vh;
+      left: 135vw;
+      width: 145px;
+      height: 115px;
+    }
+
+    .card-interests .flip-front {
+      background: white;
+    }
+
+    .card-interests .flip-front img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .card-interests .front-label {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      background: rgba(255,255,255,0.95);
+      padding: 5px 12px;
+      border-radius: 5px;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.8rem;
+      font-style: italic;
+      color: var(--charcoal);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .card-writing {
+      bottom: 35vh;
+      left: 210vw;
+      width: 165px;
+      height: 125px;
+    }
+
+    .card-writing .flip-front {
+      background: white;
+    }
+
+    .card-writing .flip-front img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .card-writing .front-label {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(0,0,0,0.65);
+      padding: 5px 12px;
+      border-radius: 5px;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.75rem;
+      font-style: italic;
+      color: white;
+    }
+
+    .card-contact {
+      bottom: 36vh;
+      left: 290vw;
+      width: 140px;
+      height: 95px;
+    }
+
+    .card-contact .flip-front {
+      background: var(--warm-white);
+      display: flex;
+      transform: rotate(-3deg);
+      border: 1px solid #e8e0d4;
+    }
+
+    .postcard-img-side {
+      width: 42%;
+      background: linear-gradient(135deg, var(--sky-light) 0%, var(--pool) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+    }
+
+    .postcard-text-side {
+      width: 58%;
+      padding: 10px;
+      position: relative;
+      border-left: 1px dashed #c9bfb0;
+    }
+
+    .postcard-stamp {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 20px;
+      height: 24px;
+      background: var(--brand);
+      border-radius: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.55rem;
+      color: white;
+    }
+
+    .postcard-lines {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      right: 10px;
+    }
+
+    .postcard-line {
+      height: 1px;
+      background: #c9bfb0;
+      margin: 6px 0;
+    }
+
+    /* Flip back content */
+    .flip-back h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--charcoal);
+      margin: 0 0 0.5rem;
+    }
+
+    .flip-back p {
+      font-size: 0.7rem;
+      line-height: 1.55;
+      color: #5a5550;
+      margin: 0 0 0.5rem;
+    }
+
+    .flip-back a {
+      color: var(--brand);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .flip-back a:hover { text-decoration: underline; }
+
+    .flip-back .links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 0.5rem;
+    }
+
+    .flip-back .link-btn {
+      font-size: 0.62rem;
+      padding: 4px 10px;
+      background: var(--brand-light);
+      color: var(--brand);
+      border-radius: 12px;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    .flip-back .link-btn:hover {
+      background: var(--brand);
+      color: white;
+    }
+
+    .card-label {
+      position: absolute;
+      bottom: -22px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.62rem;
+      color: #5a5550;
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity 0.25s;
+      font-style: italic;
+      background: rgba(255,255,255,0.95);
+      padding: 3px 10px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .flip-card:hover .card-label { opacity: 1; }
+
+    /* Welcome */
+    .welcome {
+      position: fixed;
+      bottom: 45vh;
+      left: 3vw;
+      z-index: 22;
+    }
+
+    .welcome h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1rem, 2vw, 1.6rem);
+      font-weight: 500;
+      color: var(--charcoal);
+      margin: 0;
+      text-shadow: 0 2px 10px rgba(255,255,255,0.8);
+    }
+
+    .welcome p {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 0.7rem;
+      color: #5a5550;
+      margin: 0.15rem 0 0;
+    }
+
+    /* Hints */
+    .nav-hint {
+      position: fixed;
+      bottom: 1rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.58rem;
+      color: #5a5550;
+      background: rgba(255, 253, 249, 0.96);
+      padding: 0.35rem 0.7rem;
+      border-radius: 14px;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      z-index: 100;
+    }
+
+    .nav-hint svg {
+      width: 10px;
+      height: 10px;
+      animation: scrollHint 2s ease-in-out infinite;
+    }
+
+    @keyframes scrollHint {
+      0%, 100% { transform: translateX(0); }
+      50% { transform: translateX(3px); }
+    }
+
+    .click-hint {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      font-size: 0.52rem;
+      color: #6a6055;
+      background: rgba(255, 253, 249, 0.96);
+      padding: 0.3rem 0.55rem;
+      border-radius: 10px;
+      z-index: 100;
+      backdrop-filter: blur(8px);
+    }
+
+    /* Mobile */
+    @media (max-width: 768px) {
+      .facade-left, .facade-right { display: none; }
+      .facade-back { width: 98vw; height: 26vh; top: 12vh; }
+      
+      .step-1 { width: 280px; height: 75px; }
+      .step-2 { width: 240px; height: 65px; bottom: 14px; }
+      .step-3 { width: 200px; height: 55px; bottom: 26px; }
+      .step-4 { width: 160px; height: 45px; bottom: 38px; }
+      .water { width: 120px; height: 35px; bottom: 50px; }
+
+      .card-about { left: 6vw; width: 115px; height: 145px; }
+      .card-work { left: 72vw; width: 120px; height: 95px; }
+      .card-interests { left: 155vw; width: 115px; height: 90px; }
+      .card-writing { left: 240vw; width: 135px; height: 100px; }
+      .card-contact { left: 330vw; width: 115px; height: 78px; }
+
+      .flip-back { padding: 0.65rem; }
+      .flip-back h3 { font-size: 0.9rem; }
+      .flip-back p { font-size: 0.62rem; }
+
+      .chair-3d, .table-3d, .lounge-3d, .statue-3d, .person-3d, .dog-3d, .ball-3d {
+        transform: scale(0.7);
+      }
+    }
+  </style>
+<script src="https://cdn.moda.app/runtime-libs/tailwind-browser-4.1.13-index.global.min.js"></script><style data-moda-export-fonts="true">@font-face { font-family: 'DM Sans'; src: url("../fonts/dmsans-thin.ttf") format("truetype"); font-style: normal; font-weight: 100; font-display: swap; }
+@font-face { font-family: 'DM Sans'; src: url("../fonts/dmsans-thinitalic.ttf") format("truetype"); font-style: italic; font-weight: 100; font-display: swap; }
+@font-face { font-family: 'DM Sans'; src: url("../fonts/dmsans-extralight.ttf") format("truetype"); font-style: normal; font-weight: 200; font-display: swap; }
+@font-face { font-family: 'DM Sans'; src: url("../fonts/dmsans-extralightitalic.ttf") format("truetype"); font-style: italic; font-weight: 200; font-display: swap; }
+@font-face { font-family: 'DM Sans'; src: url("../fonts/dmsans-light.ttf") format("truetype"); font-style: normal; font-weight: 300; font-display: swap; }
+@font-face { font-family: 'DM Sans'; src: url("../fonts/dmsans-lightitalic.ttf") format("truetype"); font-style: italic; font-weight: 300; font-display: swap; }
+@font-face { font-family: 'DM Sans'; src: url("../fonts/dmsans-regular.ttf") format("truetype"); font-style: normal; font-weight: 400; font-display: swap; }
+@font-face { font-family: 'DM Sans'; src: url("../fonts/dmsans-italic.ttf") format("truetype"); font-style: italic; font-weight: 400; font-display: swap; }
+@font-face { font-family: 'DM Sans'; src: url("../fonts/dmsans-medium.ttf") format("truetype"); font-style: normal; font-weight: 500; font-display: swap; }
+@font-face { font-family: 'DM Sans'; src: url("../fonts/dmsans-mediumitalic.ttf") format("truetype"); font-style: italic; font-weight: 500; font-display: swap; }
+@font-face { font-family: 'DM Sans'; src: url("../fonts/dmsans-semibold.ttf") format("truetype"); font-style: normal; font-weight: 600; font-display: swap; }
+@font-face { font-family: 'DM Sans'; src: url("../fonts/dmsans-semibolditalic.ttf") format("truetype"); font-style: italic; font-weight: 600; font-display: swap; }
+@font-face { font-family: 'DM Sans'; src: url("../fonts/dmsans-bold.ttf") format("truetype"); font-style: normal; font-weight: 700; font-display: swap; }
+@font-face { font-family: 'DM Sans'; src: url("../fonts/dmsans-bolditalic.ttf") format("truetype"); font-style: italic; font-weight: 700; font-display: swap; }
+@font-face { font-family: 'DM Sans'; src: url("../fonts/dmsans-extrabold.ttf") format("truetype"); font-style: normal; font-weight: 800; font-display: swap; }
+@font-face { font-family: 'DM Sans'; src: url("../fonts/dmsans-extrabolditalic.ttf") format("truetype"); font-style: italic; font-weight: 800; font-display: swap; }
+@font-face { font-family: 'DM Sans'; src: url("../fonts/dmsans-black.ttf") format("truetype"); font-style: normal; font-weight: 900; font-display: swap; }
+@font-face { font-family: 'DM Sans'; src: url("../fonts/dmsans-blackitalic.ttf") format("truetype"); font-style: italic; font-weight: 900; font-display: swap; }
+@font-face { font-family: 'Cormorant Garamond'; src: url("../fonts/cormorantgaramond-wght--light.ttf") format("truetype"); font-style: normal; font-weight: 300; font-display: swap; }
+@font-face { font-family: 'Cormorant Garamond'; src: url("../fonts/cormorantgaramond-wght--lightitalic.ttf") format("truetype"); font-style: italic; font-weight: 300; font-display: swap; }
+@font-face { font-family: 'Cormorant Garamond'; src: url("../fonts/cormorantgaramond-wght--regular.ttf") format("truetype"); font-style: normal; font-weight: 400; font-display: swap; }
+@font-face { font-family: 'Cormorant Garamond'; src: url("../fonts/cormorantgaramond-wght--italic.ttf") format("truetype"); font-style: italic; font-weight: 400; font-display: swap; }
+@font-face { font-family: 'Cormorant Garamond'; src: url("../fonts/cormorantgaramond-wght--medium.ttf") format("truetype"); font-style: normal; font-weight: 500; font-display: swap; }
+@font-face { font-family: 'Cormorant Garamond'; src: url("../fonts/cormorantgaramond-wght--mediumitalic.ttf") format("truetype"); font-style: italic; font-weight: 500; font-display: swap; }
+@font-face { font-family: 'Cormorant Garamond'; src: url("../fonts/cormorantgaramond-wght--semibold.ttf") format("truetype"); font-style: normal; font-weight: 600; font-display: swap; }
+@font-face { font-family: 'Cormorant Garamond'; src: url("../fonts/cormorantgaramond-wght--semibolditalic.ttf") format("truetype"); font-style: italic; font-weight: 600; font-display: swap; }
+@font-face { font-family: 'Cormorant Garamond'; src: url("../fonts/cormorantgaramond-wght--bold.ttf") format("truetype"); font-style: normal; font-weight: 700; font-display: swap; }
+@font-face { font-family: 'Cormorant Garamond'; src: url("../fonts/cormorantgaramond-wght--bolditalic.ttf") format("truetype"); font-style: italic; font-weight: 700; font-display: swap; }</style></head>
 <body>
-<div id="cur"></div>
-<div id="cur-ring"></div>
-<div id="sky"></div>
-<div id="sunglare"></div>
+  <!-- Sky & Clouds -->
+  <div class="sky"></div>
+  <div class="cloud cloud-1"></div>
+  <div class="cloud cloud-2"></div>
+  <div class="cloud cloud-3"></div>
 
-<!-- facade -->
-<svg id="facade" viewBox="0 0 4200 520" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-<defs>
-  <pattern id="bp" x="0" y="0" width="24" height="12" patternUnits="userSpaceOnUse">
-    <rect width="24" height="12" fill="#8B3A2A"/>
-    <rect x="1" y="1" width="10" height="5" fill="#974030"/>
-    <rect x="13" y="1" width="10" height="5" fill="#7A3225"/>
-    <line x1="0" y1="0" x2="24" y2="0" stroke="#6A2820" stroke-width=".4"/>
-    <line x1="0" y1="6" x2="24" y2="6" stroke="#6A2820" stroke-width=".4"/>
-  </pattern>
-  <linearGradient id="sg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#E8E0D0"/><stop offset="100%" stop-color="#B8A878"/></linearGradient>
-  <linearGradient id="wg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#3A5A7A" stop-opacity=".85"/><stop offset="100%" stop-color="#7AAACB" stop-opacity=".7"/></linearGradient>
-  <linearGradient id="fl" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="rgba(255,248,220,.1)"/><stop offset="100%" stop-color="rgba(40,30,10,.14)"/></linearGradient>
-</defs>
-<rect x="0" y="0" width="4200" height="520" fill="url(#bp)"/>
-<rect x="0" y="0" width="4200" height="520" fill="url(#fl)"/>
-<rect x="0" y="38"  width="4200" height="9" fill="url(#sg)"/>
-<rect x="0" y="128" width="4200" height="9" fill="url(#sg)"/>
-<rect x="0" y="228" width="4200" height="9" fill="url(#sg)"/>
-<rect x="0" y="328" width="4200" height="9" fill="url(#sg)"/>
-<rect x="0" y="458" width="4200" height="9" fill="url(#sg)"/>
-<rect x="0" y="428" width="4200" height="92" fill="#C8B888"/>
-<g id="fw1"></g><g id="fw2"></g><g id="fw3"></g>
-<g id="fp" fill="#D4C8A8" stroke="#B8A878" stroke-width=".5"></g>
-</svg>
-
-<div id="ground"></div>
-
-<svg id="lawns" viewBox="0 0 4200 260" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-<defs>
-  <pattern id="gp" x="0" y="0" width="4" height="4" patternUnits="userSpaceOnUse">
-    <rect width="4" height="4" fill="#4A7A3A"/>
-    <line x1="1" y1="0" x2="1" y2="4" stroke="#3A6A2A" stroke-width=".4"/>
-    <line x1="3" y1="0" x2="3" y2="4" stroke="#5A8A48" stroke-width=".3"/>
-  </pattern>
-  <linearGradient id="ghi" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="rgba(180,220,120,.22)"/><stop offset="100%" stop-color="rgba(60,100,40,0)"/></linearGradient>
-  <linearGradient id="gsh" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="rgba(40,60,20,.4)"/><stop offset="100%" stop-color="rgba(40,60,20,0)"/></linearGradient>
-</defs>
-<g id="lawn-els"></g>
-</svg>
-
-<!-- fountain -->
-<svg id="fountain" viewBox="0 0 280 170" width="280" height="170" xmlns="http://www.w3.org/2000/svg">
-<defs>
-  <radialGradient id="pg" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#A8D4E8"/><stop offset="60%" stop-color="#6AAAC0"/><stop offset="100%" stop-color="#4A8AA0"/></radialGradient>
-  <linearGradient id="jg" x1="0" y1="1" x2="0" y2="0"><stop offset="0%" stop-color="rgba(168,212,232,.9)"/><stop offset="100%" stop-color="rgba(255,255,255,.04)"/></linearGradient>
-</defs>
-<ellipse cx="140" cy="138" rx="122" ry="24" fill="#C8B888" stroke="#B8A878" stroke-width="2"/>
-<ellipse cx="140" cy="135" rx="114" ry="18" fill="url(#pg)"/>
-<ellipse cx="128" cy="133" rx="55" ry="7" fill="rgba(255,255,255,.13)" style="animation:shimmer 3s ease-in-out infinite"/>
-<ellipse cx="155" cy="137" rx="28" ry="4" fill="rgba(255,255,255,.08)" style="animation:shimmer 2s ease-in-out infinite 1s"/>
-<circle cx="140" cy="135" r="8" fill="none" stroke="rgba(255,255,255,.5)" stroke-width="1"><animate attributeName="r" values="6;38" dur="3s" repeatCount="indefinite" begin="0s"/><animate attributeName="opacity" values=".6;0" dur="3s" repeatCount="indefinite" begin="0s"/></circle>
-<circle cx="140" cy="135" r="8" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="1"><animate attributeName="r" values="6;38" dur="3s" repeatCount="indefinite" begin="1s"/><animate attributeName="opacity" values=".5;0" dur="3s" repeatCount="indefinite" begin="1s"/></circle>
-<circle cx="140" cy="135" r="8" fill="none" stroke="rgba(255,255,255,.25)" stroke-width="1"><animate attributeName="r" values="6;38" dur="3s" repeatCount="indefinite" begin="2s"/><animate attributeName="opacity" values=".4;0" dur="3s" repeatCount="indefinite" begin="2s"/></circle>
-<ellipse cx="140" cy="128" rx="12" ry="3.5" fill="#C8B888" stroke="#A89858" stroke-width="1"/>
-<rect x="134" y="88" width="12" height="40" fill="#D4C8A8" stroke="#B8A878" stroke-width=".5"/>
-<ellipse cx="140" cy="90" rx="30" ry="8" fill="#C8B888" stroke="#B8A878" stroke-width="1.5"/>
-<ellipse cx="140" cy="88" rx="26" ry="5.5" fill="url(#pg)" opacity=".7"/>
-<rect x="137" y="58" width="6" height="30" fill="#D4C8A8"/>
-<ellipse cx="140" cy="58" rx="7" ry="5" fill="#C8B888" stroke="#A89858" stroke-width="1"/>
-<circle cx="140" cy="54" r="4" fill="#D4C8A8" stroke="#B8A878" stroke-width="1"/>
-<path d="M140,54 Q137,28 140,16 Q143,28 140,54" fill="url(#jg)" style="animation:jet 2s ease-in-out infinite"/>
-<path d="M122,86 Q106,64 115,79" stroke="url(#jg)" stroke-width="2" fill="none" style="animation:jet 2.2s ease-in-out infinite .3s"/>
-<path d="M158,86 Q174,64 165,79" stroke="url(#jg)" stroke-width="2" fill="none" style="animation:jet 2.2s ease-in-out infinite .6s"/>
-<path d="M130,83 Q116,56 122,70" stroke="url(#jg)" stroke-width="1.5" fill="none" style="animation:jet 1.9s ease-in-out infinite .1s"/>
-<path d="M150,83 Q164,56 158,70" stroke="url(#jg)" stroke-width="1.5" fill="none" style="animation:jet 1.9s ease-in-out infinite .4s"/>
-<ellipse cx="148" cy="140" rx="28" ry="5" fill="rgba(40,30,10,.16)"/>
-</svg>
-
-<!-- SCROLLING TRACK -->
-<div id="world">
-<div id="track">
-
-<div class="spacer" style="width:7vw"></div>
-
-<!-- ① HERO SLAB -->
-<div class="obj-wrap" style="padding-bottom:28%">
-  <div class="obj-hint">hover to explore</div>
-  <div class="obj" style="width:220px;height:310px">
-    <div class="obj-face slab-face">
-      <div class="slab-crack"></div>
-      <div class="slab-name">Christy<br>Wong</div>
-      <div class="slab-rule"></div>
-      <div class="slab-sub">Data Engineer · Airbnb.org</div>
-      <div class="slab-ornament">✦</div>
+  <!-- Building Façade -->
+  <div class="facade-back">
+    <div class="pediment"></div>
+    <div class="frieze"></div>
+    <div class="window-row">
+      <div class="arch-win"></div>
+      <div class="arch-win"></div>
+      <div class="arch-win"></div>
+      <div class="arch-win"></div>
+      <div class="arch-win"></div>
+      <div class="arch-win"></div>
+      <div class="arch-win"></div>
     </div>
-    <div class="obj-back" style="--ac:#C8960A">
-      <div class="back-tag">Welcome</div>
-      <div class="back-title">Making the world legible through <em>data</em></div>
-      <p class="back-body">Building data infrastructure that powers social impact at Airbnb.org — one pipeline at a time. Based somewhere between spreadsheets, curiosity, and a very good cup of tea.</p>
-      <div class="chips"><span class="chip">Data Engineering</span><span class="chip">Airbnb.org</span><span class="chip">Always learning</span></div>
+    <div class="cornice-back"></div>
+  </div>
+  <div class="facade-left"></div>
+  <div class="facade-right"></div>
+
+  <!-- 3D Ground -->
+  <div class="ground-3d"></div>
+  <div class="grass-overlay"></div>
+
+  <!-- Stepped Fountain -->
+  <div class="fountain">
+    <div class="fountain-step step-1"></div>
+    <div class="fountain-step step-2"></div>
+    <div class="fountain-step step-3"></div>
+    <div class="fountain-step step-4"></div>
+    <div class="water">
+      <div class="ripple"></div>
+      <div class="ripple"></div>
+      <div class="ripple"></div>
     </div>
   </div>
-</div>
 
-<div class="spacer" style="width:5vw"></div>
+  <!-- Welcome -->
+  <div class="welcome">
+    <h1>Christiana Wong</h1>
+    <p>Welcome to my corner of the internet</p>
+  </div>
 
-<!-- ② BENCH → About -->
-<div class="obj-wrap" style="padding-bottom:29%">
-  <div class="obj-hint">about me</div>
-  <div class="obj" style="width:200px;height:200px">
-    <div class="obj-face" style="width:200px;height:200px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:6px;position:relative">
-      <div style="position:absolute;top:28px;left:50%;transform:translateX(-50%);width:76px;height:17px;background:#C8B888;border:1px solid #A89858;border-radius:1px;display:flex;align-items:center;justify-content:center;z-index:2">
-        <span style="font-size:7px;letter-spacing:.12em;text-transform:uppercase;color:#5A4A2A">About me</span>
+  <!-- Hints -->
+  <div class="nav-hint">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"></path></svg>
+    <span>Scroll to explore</span>
+  </div>
+  <div class="click-hint">✨ Hover to peek · Click to keep</div>
+
+  <!-- Scrollable Content -->
+  <div class="scene-container" id="container">
+    <div class="content-layer">
+
+      <!-- 3D Lounge Chairs -->
+      <div class="lounge-3d" style="bottom: 28vh; left: 6vw;">
+        <div class="lounge-3d-back"></div>
+        <div class="lounge-3d-base"></div>
+        <div class="lounge-3d-frame"></div>
       </div>
-      <div class="bench-seat"></div>
-      <div class="bench-legs"><div class="bench-leg" style="height:36px"></div><div class="bench-leg" style="height:36px"></div></div>
-    </div>
-    <div class="obj-back" style="--ac:#2A7A68">
-      <div class="back-tag">About me</div>
-      <div class="back-title">A curious mind in a world of <em>patterns</em></div>
-      <p class="back-body">Data engineer at Airbnb.org, where infrastructure drives social good. I believe good pipelines are a form of care — they help people decide better, faster.</p>
-      <p class="back-body" style="margin-bottom:0">When not at the terminal, I'm haunting a museum, reading something dense, or noticing geometry in everyday things.</p>
-      <div class="chips" style="margin-top:.5rem"><span class="chip">London</span><span class="chip">Museums</span><span class="chip">Perpetual learner</span></div>
-    </div>
-  </div>
-</div>
-
-<div class="spacer" style="width:6vw"></div>
-
-<!-- ③ GLOBE → Interests -->
-<div class="obj-wrap" style="padding-bottom:26%">
-  <div class="obj-hint">interests</div>
-  <div class="obj" style="width:100px;height:150px">
-    <div class="obj-face" style="width:100px;height:150px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end">
-      <div class="globe-sphere">
-        <div class="globe-land" style="width:18px;height:12px;top:26px;left:16px;transform:rotate(-10deg)"></div>
-        <div class="globe-land" style="width:25px;height:16px;top:20px;left:38px;transform:rotate(5deg)"></div>
-        <div class="globe-land" style="width:14px;height:18px;top:42px;left:22px;transform:rotate(15deg)"></div>
-        <div class="globe-land" style="width:10px;height:9px;top:50px;left:54px"></div>
-        <div class="globe-land" style="width:9px;height:12px;top:56px;left:30px;transform:rotate(-5deg)"></div>
+      <div class="lounge-3d" style="bottom: 26vh; left: 14vw; transform: rotate(12deg);">
+        <div class="lounge-3d-back"></div>
+        <div class="lounge-3d-base"></div>
+        <div class="lounge-3d-frame"></div>
       </div>
-      <div class="globe-stand-neck"></div>
-      <div class="globe-stand-base"></div>
-    </div>
-    <div class="obj-back" style="--ac:#5A38A0">
-      <div class="back-tag">Interests</div>
-      <div class="back-title">The things that make me <em>tick</em></div>
-      <div class="ig">
-        <div class="ig-cell"><span class="ig-icon">🏛️</span><div class="ig-lbl">Museums</div></div>
-        <div class="ig-cell"><span class="ig-icon">📊</span><div class="ig-lbl">Data viz</div></div>
-        <div class="ig-cell"><span class="ig-icon">📚</span><div class="ig-lbl">Reading</div></div>
-        <div class="ig-cell"><span class="ig-icon">🌍</span><div class="ig-lbl">Travel</div></div>
-        <div class="ig-cell"><span class="ig-icon">🎨</span><div class="ig-lbl">Design</div></div>
-        <div class="ig-cell"><span class="ig-icon">🍵</span><div class="ig-lbl">Good tea</div></div>
+
+      <!-- 3D Bistro Set -->
+      <div class="table-3d" style="bottom: 34vh; left: 90vw;">
+        <div class="table-3d-top"></div>
+        <div class="table-3d-leg"></div>
+        <div class="table-3d-base"></div>
       </div>
-    </div>
-  </div>
-</div>
-
-<div class="spacer" style="width:5vw"></div>
-
-<!-- ④ EASEL → Gallery -->
-<div class="obj-wrap" style="padding-bottom:24%">
-  <div class="obj-hint">gallery</div>
-  <div class="obj" style="width:140px;height:215px">
-    <div class="obj-face" style="width:140px;height:215px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end">
-      <div class="easel-frame">🌸</div>
-      <div class="easel-legs">
-        <div class="easel-leg easel-leg-l"></div>
-        <div class="easel-leg easel-leg-m"></div>
-        <div class="easel-leg easel-leg-r"></div>
+      <div class="chair-3d" style="bottom: 30vh; left: 86vw;">
+        <div class="chair-3d-back"></div>
+        <div class="chair-3d-seat"></div>
+        <div class="chair-3d-legs">
+          <div class="chair-leg"></div>
+          <div class="chair-leg"></div>
+          <div class="chair-leg"></div>
+          <div class="chair-leg"></div>
+        </div>
       </div>
-    </div>
-    <div class="obj-back" style="--ac:#C05A18">
-      <div class="back-tag">Gallery</div>
-      <div class="back-title">A visual <em>diary</em></div>
-      <p class="back-body" style="font-size:.72rem;margin-bottom:.4rem">Moments & places. Swap emoji for &lt;img&gt; tags with your own photos.</p>
-      <div class="mini-gallery">
-        <div class="mgcell">🏛️</div><div class="mgcell">🌆</div><div class="mgcell">📈</div>
-        <div class="mgcell">🌸</div><div class="mgcell">🧳</div><div class="mgcell">✨</div>
+      <div class="chair-3d" style="bottom: 30vh; left: 95vw; transform: scaleX(-1);">
+        <div class="chair-3d-back"></div>
+        <div class="chair-3d-seat"></div>
+        <div class="chair-3d-legs">
+          <div class="chair-leg"></div>
+          <div class="chair-leg"></div>
+          <div class="chair-leg"></div>
+          <div class="chair-leg"></div>
+        </div>
       </div>
-    </div>
-  </div>
-</div>
 
-<div class="spacer" style="width:5vw"></div>
-
-<!-- ⑤ URN → Work -->
-<div class="obj-wrap" style="padding-bottom:26%">
-  <div class="obj-hint">work</div>
-  <div class="obj" style="width:110px;height:170px">
-    <div class="obj-face" style="width:110px;height:170px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end">
-      <div class="urn-stack">
-        <div class="urn-plant">🌿</div>
-        <div class="urn-neck"></div>
-        <div class="urn-body"></div>
-        <div class="urn-base"></div>
+      <div class="table-3d" style="bottom: 28vh; left: 175vw;">
+        <div class="table-3d-top"></div>
+        <div class="table-3d-leg"></div>
+        <div class="table-3d-base"></div>
       </div>
-    </div>
-    <div class="obj-back" style="--ac:#A83040">
-      <div class="back-tag">Work</div>
-      <div class="back-title">Things I've <em>built</em></div>
-      <div class="mini-card"><div class="mini-card-t">Data pipelines · Airbnb.org</div><div class="mini-card-d">Infrastructure powering social impact measurement at scale.</div></div>
-      <div class="mini-card"><div class="mini-card-t">Impact frameworks</div><div class="mini-card-d">Complex social data → clear, actionable insights.</div></div>
-      <div class="mini-card"><div class="mini-card-t">Side experiments</div><div class="mini-card-d">Data viz, automation & fun builds.</div></div>
-    </div>
-  </div>
-</div>
-
-<div class="spacer" style="width:5vw"></div>
-
-<!-- ⑥ BOOK STACK → Writing -->
-<div class="obj-wrap" style="padding-bottom:27%">
-  <div class="obj-hint">writing</div>
-  <div class="obj" style="width:130px;height:175px">
-    <div class="obj-face" style="width:130px;height:175px;display:flex;flex-direction:row;align-items:flex-end;justify-content:center;gap:4px">
-      <div class="book" style="width:26px;height:140px;background:linear-gradient(180deg,#C05830 0%,#9A3E18 100%);border-top:4px solid #D87040;border-left:3px solid #E8884A"><div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-90deg);font-size:7px;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,240,200,.68);white-space:nowrap">Essays</div></div>
-      <div class="book" style="width:30px;height:168px;background:linear-gradient(180deg,#2A5878 0%,#1A3858 100%);border-top:4px solid #3A78A8;border-left:3px solid #4A90C0"><div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-90deg);font-size:7px;letter-spacing:.06em;text-transform:uppercase;color:rgba(180,220,255,.68);white-space:nowrap">Data</div></div>
-      <div class="book" style="width:22px;height:124px;background:linear-gradient(180deg,#3A7838 0%,#265A24 100%);border-top:4px solid #4A9848;border-left:3px solid #5AB058"><div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-90deg);font-size:7px;letter-spacing:.06em;text-transform:uppercase;color:rgba(200,255,200,.58);white-space:nowrap">Notes</div></div>
-      <div class="book" style="width:20px;height:152px;background:linear-gradient(180deg,#8A6020 0%,#6A4010 100%);border-top:4px solid #B08030;border-left:3px solid #C09040;transform:rotate(4deg);transform-origin:bottom left"><div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-90deg);font-size:7px;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,230,160,.58);white-space:nowrap">Blog</div></div>
-    </div>
-    <div class="obj-back" style="--ac:#3A7830">
-      <div class="back-tag">Writing</div>
-      <div class="back-title">Words I've <em>put down</em></div>
-      <div class="wrow"><div class="wrow-t">The poetry of a clean data pipeline</div><div class="wrow-m">Essay · Engineering</div></div>
-      <div class="wrow"><div class="wrow-t">What museums taught me about information architecture</div><div class="wrow-m">Reflection · Design</div></div>
-      <div class="wrow"><div class="wrow-t">Measuring what matters at nonprofits</div><div class="wrow-m">Deep dive · Impact</div></div>
-      <div class="wrow" style="border-bottom:none;opacity:.45"><div class="wrow-t" style="font-style:normal">Add your posts here</div><div class="wrow-m">—</div></div>
-    </div>
-  </div>
-</div>
-
-<div class="spacer" style="width:5vw"></div>
-
-<!-- ⑦ TELESCOPE → Contact -->
-<div class="obj-wrap" style="padding-bottom:27%">
-  <div class="obj-hint">contact</div>
-  <div class="obj" style="width:130px;height:115px">
-    <div class="obj-face" style="width:130px;height:115px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end">
-      <div class="scope-barrel"></div>
-      <div class="scope-tripod">
-        <div class="scope-leg scope-leg-a"></div>
-        <div class="scope-leg scope-leg-b"></div>
-        <div class="scope-leg scope-leg-c"></div>
+      <div class="chair-3d" style="bottom: 24vh; left: 172vw;">
+        <div class="chair-3d-back"></div>
+        <div class="chair-3d-seat"></div>
+        <div class="chair-3d-legs">
+          <div class="chair-leg"></div>
+          <div class="chair-leg"></div>
+        </div>
       </div>
-    </div>
-    <div class="obj-back" style="--ac:#C8960A">
-      <div class="back-tag">Contact</div>
-      <div class="back-title">Let's <em>connect</em></div>
-      <a class="clink" href="mailto:your@email.com"><div class="clink-icon">✉️</div>your@email.com</a>
-      <a class="clink" href="https://linkedin.com/in/yourhandle" target="_blank"><div class="clink-icon">💼</div>LinkedIn</a>
-      <a class="clink" href="https://github.com/yourhandle" target="_blank"><div class="clink-icon">🐙</div>GitHub</a>
-      <a class="clink" href="https://twitter.com/yourhandle" target="_blank" style="border-bottom:none"><div class="clink-icon">🐦</div>Twitter / X</a>
+
+      <!-- 3D Statues (on grass, away from fountain) -->
+      <div class="statue-3d" style="bottom: 42vh; left: 35vw;">
+        <div class="statue-figure"></div>
+        <div class="statue-plinth"></div>
+      </div>
+      <div class="statue-3d" style="bottom: 40vh; left: 250vw;">
+        <div class="statue-figure"></div>
+        <div class="statue-plinth"></div>
+      </div>
+
+      <!-- 3D Family -->
+      <div class="person-3d" style="bottom: 32vh; left: 52vw;">
+        <div class="person-3d-head"></div>
+        <div class="person-3d-body" style="background: linear-gradient(180deg, #5a7a9a 0%, #4a6a8a 100%);"></div>
+        <div class="person-3d-legs">
+          <div class="person-3d-leg" style="background: linear-gradient(180deg, #3a3a4a 0%, #2a2a3a 100%);"></div>
+          <div class="person-3d-leg" style="background: linear-gradient(180deg, #3a3a4a 0%, #2a2a3a 100%);"></div>
+        </div>
+      </div>
+      <div class="person-3d" style="bottom: 32vh; left: 55vw;">
+        <div class="person-3d-head"></div>
+        <div class="person-3d-body" style="background: linear-gradient(180deg, #c47070 0%, #a45050 100%); height: 30px; border-radius: 8px 8px 6px 6px;"></div>
+      </div>
+      <div class="person-3d" style="bottom: 30vh; left: 58vw; transform: scale(0.7);">
+        <div class="person-3d-head"></div>
+        <div class="person-3d-body" style="background: linear-gradient(180deg, #e8a050 0%, #d08030 100%);"></div>
+        <div class="person-3d-legs">
+          <div class="person-3d-leg" style="background: linear-gradient(180deg, #4a4a5a 0%, #3a3a4a 100%);"></div>
+          <div class="person-3d-leg" style="background: linear-gradient(180deg, #4a4a5a 0%, #3a3a4a 100%);"></div>
+        </div>
+      </div>
+
+      <!-- 3D Dog & Ball -->
+      <div class="dog-3d" style="bottom: 28vh; left: 61vw;">
+        <div class="dog-3d-body">
+          <div class="dog-3d-head"></div>
+          <div class="dog-3d-tail"></div>
+          <div class="dog-3d-legs">
+            <div class="dog-3d-leg"></div>
+            <div class="dog-3d-leg"></div>
+            <div class="dog-3d-leg"></div>
+            <div class="dog-3d-leg"></div>
+          </div>
+        </div>
+      </div>
+      <div class="ball-3d" style="bottom: 26vh; left: 65vw;"></div>
+
+      <!-- Another person -->
+      <div class="person-3d" style="bottom: 36vh; left: 115vw;">
+        <div class="person-3d-head"></div>
+        <div class="person-3d-body" style="background: linear-gradient(180deg, #6a9a6a 0%, #5a8a5a 100%);"></div>
+        <div class="person-3d-legs">
+          <div class="person-3d-leg" style="background: linear-gradient(180deg, #4a4a5a 0%, #3a3a4a 100%);"></div>
+          <div class="person-3d-leg" style="background: linear-gradient(180deg, #4a4a5a 0%, #3a3a4a 100%);"></div>
+        </div>
+      </div>
+
+      <!-- === FLIP CARDS === -->
+
+      <!-- ABOUT -->
+      <div class="flip-card card-about">
+        <div class="flip-inner">
+          <div class="flip-front">
+            <div class="front-inner">
+              <img src="../images/b5aa8337-e3b5-493f-9f87-8dd061993e9c.png" alt="Detroit skyline">
+              <div class="label">About Me</div>
+            </div>
+          </div>
+          <div class="flip-back">
+            <h3>Hello, I'm Christy!</h3>
+            <p>People assume I'm from California—something about my voice. But I grew up in <strong>Detroit</strong>, the poster child of post-industrial resilience.</p>
+            <p>Bookish kid → arts high school → <strong>Yale</strong> (Applied Math &amp; CS). Courses ranged from algorithms to art theory, organic chem to food writing.</p>
+          </div>
+        </div>
+        <span class="card-label">About Me</span>
+      </div>
+
+      <!-- WORK -->
+      <div class="flip-card card-work">
+        <div class="flip-inner">
+          <div class="flip-front">
+            <img src="../images/52060fb2-b59a-49d3-98a6-da7f88a2f202.png" alt="Housing illustration">
+            <div class="front-label">Work</div>
+          </div>
+          <div class="flip-back">
+            <h3>Professional</h3>
+            <p>I'm a <strong>data engineer</strong> for <strong>Airbnb.org</strong>, a disaster response and emergency housing non-profit.</p>
+            <p>Curious about our work or want to get involved? I'm always happy to chat about it.</p>
+          </div>
+        </div>
+        <span class="card-label">Work</span>
+      </div>
+
+      <!-- INTERESTS -->
+      <div class="flip-card card-interests">
+        <div class="flip-inner">
+          <div class="flip-front">
+            <img src="../images/f268e406-d850-4db7-abfb-c211891989b1.png" alt="Books and tea">
+            <div class="front-label">Interests</div>
+          </div>
+          <div class="flip-back">
+            <h3>What Lights Me Up</h3>
+            <p><strong>Sports:</strong> Running, tennis, soccer, pickleball, snowboarding, dance.</p>
+            <p><strong>Cooking:</strong> Working through Salt, Acid, Fat, Heat. But I've always liked baking more.</p>
+            <p><strong>Books:</strong> Pachinko, Everything I Never Told You, Chemistry, The Opposite of Loneliness.</p>
+          </div>
+        </div>
+        <span class="card-label">Interests</span>
+      </div>
+
+      <!-- WRITING -->
+      <div class="flip-card card-writing">
+        <div class="flip-inner">
+          <div class="flip-front">
+            <img src="../images/8efa115f-a27f-495a-850c-17374e7074d7.png" alt="Desert sunrise">
+            <div class="front-label">A Travel Excerpt</div>
+          </div>
+          <div class="flip-back">
+            <h3>Writing</h3>
+            <p style="font-style: italic; font-size: 0.65rem; line-height: 1.55;">"It was 5am and so dark I couldn't see my hands. Soon we reached the summit. A yellow haze emerged on the horizon and the sun sliced through the sky. Red sand as far as you could see..."</p>
+            <a href="#" style="font-size: 0.62rem;">Read more →</a>
+          </div>
+        </div>
+        <span class="card-label">Writing</span>
+      </div>
+
+      <!-- CONTACT -->
+      <div class="flip-card card-contact">
+        <div class="flip-inner">
+          <div class="flip-front">
+            <div class="postcard-img-side">✉️</div>
+            <div class="postcard-text-side">
+              <div class="postcard-stamp">🏛️</div>
+              <div class="postcard-lines">
+                <div class="postcard-line"></div>
+                <div class="postcard-line"></div>
+                <div class="postcard-line"></div>
+              </div>
+            </div>
+          </div>
+          <div class="flip-back">
+            <h3>Let's Talk</h3>
+            <p>Find this relatable? Or this layout offensive to your aesthetic senses?</p>
+            <div class="links">
+              <a href="#" class="link-btn">Twitter</a>
+              <a href="#" class="link-btn">LinkedIn</a>
+              <a href="#" class="link-btn">GitHub</a>
+              <a href="#" class="link-btn">Instagram</a>
+            </div>
+          </div>
+        </div>
+        <span class="card-label">Contact</span>
+      </div>
+
     </div>
   </div>
-</div>
 
-<!-- ⑧ TEAPOT easter egg -->
-<div class="obj-wrap" style="padding-bottom:29%">
-  <div class="obj-hint">a little extra</div>
-  <div class="obj" style="width:90px;height:85px">
-    <div class="obj-face" style="width:90px;height:85px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:2px">
-      <div style="position:relative"><div class="teapot-body"><div class="teapot-spout"></div><div class="teapot-handle"></div><div class="teapot-lid"></div><div class="teapot-knob"></div></div></div>
-      <div class="tea-saucer"></div>
-    </div>
-    <div class="obj-back" style="--ac:#C8960A;text-align:center;justify-content:center;align-items:center">
-      <div style="font-size:1.7rem;margin-bottom:.35rem">🍵</div>
-      <div class="back-title" style="font-size:.95rem;text-align:center">Always time<br>for <em>tea</em></div>
-      <p class="back-body" style="font-size:.7rem;text-align:center;margin-top:.35rem">"A cup of tea would restore my normality."<br>— Douglas Adams</p>
-    </div>
-  </div>
-</div>
+  <script>
+    const container = document.getElementById('container');
 
-<div class="spacer" style="width:12vw"></div>
-</div>
-</div>
+    document.querySelectorAll('.flip-card').forEach(card => {
+      card.addEventListener('click', () => {
+        card.querySelector('.flip-inner').classList.toggle('flipped');
+      });
+    });
 
-<div id="backdrop"></div>
-<button id="close-btn" aria-label="Close">✕</button>
+    let isDown = false, startX, scrollStart;
 
-<div id="nav">
-  <div class="dot on" data-i="0"></div>
-  <div class="dot" data-i="1"></div>
-  <div class="dot" data-i="2"></div>
-  <div class="dot" data-i="3"></div>
-  <div class="dot" data-i="4"></div>
-  <div class="dot" data-i="5"></div>
-  <div class="dot" data-i="6"></div>
-</div>
-<div id="sec-label">Christy Wong</div>
-<div id="hint">scroll to explore <span class="ha">→</span></div>
+    container.addEventListener('mousedown', (e) => {
+      if (e.target.closest('.flip-card')) return;
+      isDown = true;
+      container.style.cursor = 'grabbing';
+      startX = e.pageX;
+      scrollStart = container.scrollLeft;
+    });
 
-<script>
-(function(){
-  let h1='',h2='',h3='',hp='';
-  for(let x=30;x<4170;x+=100){
-    h1+=`<g><rect x="${x}" y="48" width="44" height="72" rx="22" fill="#1E1608" stroke="#B09848" stroke-width="1"/><rect x="${x+4}" y="52" width="36" height="60" rx="18" fill="url(#wg)"/><line x1="${x+22}" y1="52" x2="${x+22}" y2="112" stroke="rgba(200,190,160,.22)" stroke-width=".7"/></g>`;
-    h2+=`<g><rect x="${x+3}" y="138" width="38" height="82" rx="2" fill="#1E1608" stroke="#B09848" stroke-width=".8"/><rect x="${x+7}" y="142" width="30" height="74" fill="url(#wg)"/><line x1="${x+22}" y1="142" x2="${x+22}" y2="216" stroke="rgba(200,190,160,.18)" stroke-width=".6"/></g>`;
-    h3+=`<g><rect x="${x+6}" y="238" width="32" height="52" rx="2" fill="#1E1608" stroke="#A08838" stroke-width=".7"/><rect x="${x+10}" y="242" width="24" height="44" fill="url(#wg)"/></g>`;
-  }
-  for(let x=0;x<4200;x+=40) hp+=`<rect x="${x}" y="0" width="22" height="38" rx="1"/>`;
-  document.getElementById('fw1').innerHTML=h1;
-  document.getElementById('fw2').innerHTML=h2;
-  document.getElementById('fw3').innerHTML=h3;
-  document.getElementById('fp').innerHTML=hp;
-})();
+    document.addEventListener('mouseup', () => {
+      isDown = false;
+      container.style.cursor = 'grab';
+    });
 
-(function(){
-  let h='';
-  [80,820,1560,2300,3040,3780].forEach(x=>{
-    h+=`<rect x="${x}" y="50" width="520" height="180" rx="4" fill="url(#gp)"/>`;
-    h+=`<rect x="${x}" y="50" width="520" height="180" rx="4" fill="url(#ghi)"/>`;
-    h+=`<rect x="${x}" y="50" width="520" height="50" rx="4" fill="url(#gsh)"/>`;
-    h+=`<rect x="${x-4}" y="46" width="528" height="188" rx="5" fill="none" stroke="#C8B888" stroke-width="3"/>`;
-  });
-  document.getElementById('lawn-els').innerHTML=h;
-})();
+    container.addEventListener('mousemove', (e) => {
+      if (!isDown) return;
+      e.preventDefault();
+      container.scrollLeft = scrollStart + (startX - e.pageX) * 1.5;
+    });
 
-const track=document.getElementById('track');
-const facade=document.getElementById('facade');
-const lawns=document.getElementById('lawns');
-const fountain=document.getElementById('fountain');
-const dots=Array.from(document.querySelectorAll('.dot'));
-const label=document.getElementById('sec-label');
-const backdrop=document.getElementById('backdrop');
-const closeBtn=document.getElementById('close-btn');
-let activeWrap=null,savedStyle={};
-const EXPANDED_W=420,EXPANDED_H=520;
-const sectionLabels=['Christy Wong','About me','Interests','Gallery','Work','Writing','Contact'];
+    container.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      container.scrollLeft += e.deltaY * 1.5;
+    }, { passive: false });
 
-let curX=0,tgtX=0,isDrag=false,dX=0,dStart=0,curSec=0,didMove=false;
-function maxW(){return Math.max(0,track.scrollWidth-window.innerWidth)}
-function secX(i){return Math.min(i*maxW()/Math.max(1,dots.length-1),maxW())}
-function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
+    let touchStart = 0, touchScroll = 0;
+    container.addEventListener('touchstart', (e) => {
+      touchStart = e.touches[0].pageX;
+      touchScroll = container.scrollLeft;
+    }, { passive: true });
 
-function updateDots(){
-  const mw=maxW(); if(!mw) return;
-  const pct=Math.abs(curX)/mw;
-  const idx=Math.min(Math.round(pct*(dots.length-1)),dots.length-1);
-  if(idx!==curSec){
-    curSec=idx;
-    dots.forEach((d,i)=>d.classList.toggle('on',i===idx));
-    label.textContent=sectionLabels[idx]||'';
-  }
-}
+    container.addEventListener('touchmove', (e) => {
+      container.scrollLeft = touchScroll + (touchStart - e.touches[0].pageX) * 1.2;
+    }, { passive: true });
+  </script>
 
-let lastT=0;
-(function raf(ts){
-  const dt=Math.min((ts-lastT)/1000,.05);lastT=ts;
-  if(!isDrag){curX+=(tgtX-curX)*(1-Math.pow(.03,dt));}
-  curX=clamp(curX,-maxW(),0);
-  const px=Math.round(curX);
-  track.style.transform=`translateX(${px}px)`;
-  facade.style.transform=`translateX(${px*.22}px)`;
-  lawns.style.transform=`translateX(${px*.55}px)`;
-  fountain.style.left=(window.innerWidth/2-140+px*.55)+'px';
-  updateDots();
-  requestAnimationFrame(raf);
-})(0);
-
-window.addEventListener('wheel',e=>{e.preventDefault();if(activeWrap)return;tgtX=clamp(tgtX-(e.deltaX||e.deltaY)*1.4,-maxW(),0);},{passive:false});
-window.addEventListener('pointerdown',e=>{if(e.target.closest('a,.clink'))return;if(activeWrap)return;isDrag=false;didMove=false;dX=e.clientX;dStart=curX;document.body.style.userSelect='none';});
-window.addEventListener('pointermove',e=>{if(activeWrap)return;const moved=Math.abs(e.clientX-dX)>4;if(moved){isDrag=true;didMove=true;curX=clamp(dStart+(e.clientX-dX),-maxW(),0);tgtX=curX;}});
-window.addEventListener('pointerup',()=>{setTimeout(()=>{isDrag=false;},50);document.body.style.userSelect='';});
-window.addEventListener('keydown',e=>{
-  const s=maxW()/Math.max(1,dots.length-1);
-  if(e.key==='ArrowRight'||e.key==='ArrowDown')tgtX=clamp(tgtX-s,-maxW(),0);
-  if(e.key==='ArrowLeft'||e.key==='ArrowUp')tgtX=clamp(tgtX+s,-maxW(),0);
-});
-dots.forEach((d,i)=>d.addEventListener('click',()=>{tgtX=-secX(i);}));
-
-// ── Cursor ──────────────────────────────────────
-const cur=document.getElementById('cur'),ring=document.getElementById('cur-ring');
-let mx=0,my=0,rx=0,ry=0;
-window.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.left=mx+'px';cur.style.top=my+'px';});
-(function rl(){rx+=(mx-rx)*.14;ry+=(my-ry)*.14;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(rl);})();
-
-// ── Click-to-expand ──────────────────────────────
-
-function openObj(wrap){
-  if(activeWrap) closeObj();
-
-  // Snapshot original layout position so we can restore
-  const rect=wrap.getBoundingClientRect();
-  savedStyle={
-    position:wrap.style.position,
-    left:wrap.style.left,
-    top:wrap.style.top,
-    width:wrap.style.width,
-    height:wrap.style.height,
-    zIndex:wrap.style.zIndex,
-    paddingBottom:wrap.style.paddingBottom,
-    transform:wrap.style.transform,
-    transition:wrap.style.transition,
-    marginLeft:wrap.style.marginLeft,
-    marginRight:wrap.style.marginRight,
-  };
-
-  // Freeze in place first (no jump)
-  wrap.style.position='fixed';
-  wrap.style.left=rect.left+'px';
-  wrap.style.top=rect.top+'px';
-  wrap.style.width=rect.width+'px';
-  wrap.style.height=rect.height+'px';
-  wrap.style.paddingBottom='0';
-  wrap.style.zIndex='60';
-  wrap.style.transition='none';
-  wrap.style.marginLeft='0';
-  wrap.style.marginRight='0';
-
-  // Force reflow then animate to centre
-  wrap.getBoundingClientRect();
-
-  const cX=window.innerWidth/2-EXPANDED_W/2;
-  const cY=window.innerHeight/2-EXPANDED_H/2;
-
-  wrap.style.transition='left .45s cubic-bezier(.4,0,.2,1),top .45s cubic-bezier(.4,0,.2,1),width .45s cubic-bezier(.4,0,.2,1),height .45s cubic-bezier(.4,0,.2,1)';
-  wrap.style.left=cX+'px';
-  wrap.style.top=cY+'px';
-  wrap.style.width=EXPANDED_W+'px';
-  wrap.style.height=EXPANDED_H+'px';
-
-  // Flip the inner obj
-  const obj=wrap.querySelector('.obj');
-  obj.style.width=EXPANDED_W+'px';
-  obj.style.height=EXPANDED_H+'px';
-  obj.style.transition='transform .65s cubic-bezier(.4,0,.2,1)';
-  obj.style.transform='rotateY(180deg)';
-
-  wrap.classList.add('expanded');
-  backdrop.classList.add('on');
-  closeBtn.classList.add('on');
-  activeWrap=wrap;
-
-  // Cursor feedback
-  cur.classList.add('hov'); ring.classList.add('hov');
-}
-
-function closeObj(){
-  if(!activeWrap) return;
-  const wrap=activeWrap;
-  const obj=wrap.querySelector('.obj');
-
-  // Flip back
-  obj.style.transform='rotateY(0deg)';
-
-  // Shrink back — animate position back (approx original; exact restore looks jarring so just fade out)
-  wrap.style.transition='left .4s cubic-bezier(.4,0,.2,1),top .4s cubic-bezier(.4,0,.2,1),width .4s cubic-bezier(.4,0,.2,1),height .4s cubic-bezier(.4,0,.2,1),opacity .35s ease';
-  wrap.style.opacity='0';
-
-  backdrop.classList.remove('on');
-  closeBtn.classList.remove('on');
-
-  setTimeout(()=>{
-    wrap.classList.remove('expanded');
-    // Restore to flow
-    wrap.style.position=savedStyle.position||'';
-    wrap.style.left=savedStyle.left||'';
-    wrap.style.top=savedStyle.top||'';
-    wrap.style.width=savedStyle.width||'';
-    wrap.style.height=savedStyle.height||'';
-    wrap.style.paddingBottom=savedStyle.paddingBottom||'';
-    wrap.style.zIndex=savedStyle.zIndex||'';
-    wrap.style.transition=savedStyle.transition||'';
-    wrap.style.marginLeft=savedStyle.marginLeft||'';
-    wrap.style.marginRight=savedStyle.marginRight||'';
-    wrap.style.opacity='';
-    obj.style.width='';
-    obj.style.height='';
-    obj.style.transform='';
-    activeWrap=null;
-    cur.classList.remove('hov'); ring.classList.remove('hov');
-  },420);
-}
-
-document.querySelectorAll('.obj-wrap').forEach(wrap=>{
-  // Hover cursor
-  wrap.addEventListener('mouseenter',()=>{ if(!activeWrap){cur.classList.add('hov');ring.classList.add('hov');} });
-  wrap.addEventListener('mouseleave',()=>{ if(!activeWrap){cur.classList.remove('hov');ring.classList.remove('hov');} });
-
-  // Click to open — only if not dragging
-  wrap.addEventListener('click',e=>{
-    if(isDrag) return;
-    if(e.target.closest('a,.clink')) return;
-    if(wrap.classList.contains('expanded')){closeObj();return;}
-    if(activeWrap){closeObj();setTimeout(()=>openObj(wrap),420);return;}
-    openObj(wrap);
-  });
-});
-
-backdrop.addEventListener('click',closeObj);
-closeBtn.addEventListener('click',closeObj);
-window.addEventListener('keydown',e=>{ if(e.key==='Escape') closeObj(); });
-
-// Prevent scroll from closing/opening unexpectedly when expanded
-window.addEventListener('wheel',e=>{if(activeWrap) e.stopPropagation();},{capture:true,passive:false});
-
-// ── Scroll hint ──────────────────────────────────
-const hint=document.getElementById('hint');
-const hh=()=>hint.style.display='none';
-window.addEventListener('wheel',hh,{once:true});
-window.addEventListener('pointerdown',hh,{once:true});
-</script>
-</body>
-</html>
+</body></html>
