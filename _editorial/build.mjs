@@ -78,7 +78,7 @@ try { const theme = localStorage.getItem('cw-theme'); if (theme === 'light' || t
 </script>
 <script src="/assets/site.js" defer></script>
 </head>
-<body>
+<body class="${path === '/' ? 'front-page' : kind === 'article' ? 'article-page' : 'inside-page'}">
 <a class="skip" href="#main">Skip to content</a>
 <header class="site-header shell">
   <a class="masthead" href="/">christiana wong<span>.</span></a>
@@ -147,27 +147,18 @@ function bookItem(book, preview = false) {
     </div></details></li>`;
 }
 
-function gardenArtwork() {
-  const leaves = Array.from({length: 105}, (_, i) => {
-    const angle = i * 137.508;
-    const radius = 11 * Math.sqrt(i);
-    const size = 1.5 + i / 23;
-    return `<ellipse cx="${radius.toFixed(1)}" cy="0" rx="${size.toFixed(1)}" ry="${(size * .44).toFixed(1)}" transform="rotate(${angle.toFixed(1)})" fill="${i % 7 === 0 ? 'var(--accent)' : 'currentColor'}"/>`;
-  }).join('');
-  return `<svg class="hero-art" viewBox="0 0 244 244" aria-hidden="true"><circle cx="122" cy="122" r="116" fill="none" stroke="currentColor" stroke-width=".6" stroke-dasharray="1 4"/><g transform="translate(122 122)">${leaves}</g></svg>`;
-}
-
-const home = `<section class="home-hero">
-  <div class="hero-copy"><h1>I think a lot<br><em>and write a little.</em></h1>
-  <p class="lede">Engineer, art enthusiast, and perpetually curious person.</p>
-  <p class="itinerary">Detroit ${direction} New York ${direction} San Francisco</p></div>
-  <a class="hero-figure" href="/playground/#garden" aria-label="Explore the Mathematical garden">${gardenArtwork()}</a>
-</section>
-<section class="home-section" id="writing">
-  <header class="section-head"><h2>Selected writing</h2><a class="text-link" href="/writing/">Writing archive ${arrow}</a></header>
-  ${feature(featured, featured?.file === 'a-sunrise-hike.md' ? 'sunrise-card' : '')}
-  ${articles.length > 1 ? '<ul class="writing-list">' + articles.filter(a => a !== featured).slice(0,3).map(a => writingRow(a)).join('') + '</ul>' : ''}
-</section>
+const home = `<div class="front-spread">
+  <section class="home-hero" aria-labelledby="opening-line">
+    <div class="hero-copy"><h1 id="opening-line">I think a lot<br><em>and write<br class="display-break"> a little.</em></h1>
+    <div class="hero-context"><p class="lede">Engineer, art enthusiast, and perpetually curious person.</p>
+    <p class="itinerary">Detroit ${direction} New York ${direction} San Francisco</p></div></div>
+  </section>
+  <section class="home-selection" id="writing">
+    <header class="section-head"><h2>Selected writing</h2><a class="text-link" href="/writing/">Archive ${arrow}</a></header>
+    ${feature(featured, featured?.file === 'a-sunrise-hike.md' ? 'sunrise-card' : '')}
+  </section>
+</div>
+${articles.length > 1 ? '<ul class="writing-list">' + articles.filter(a => a !== featured).slice(0,3).map(a => writingRow(a)).join('') + '</ul>' : ''}
 <div class="home-columns">
   <section class="home-section" id="now">
     <header class="section-head"><h2>Lately</h2><a class="text-link" href="/now/">Now ${arrow}</a></header>
@@ -190,13 +181,13 @@ const home = `<section class="home-hero">
 <section id="about" class="home-section home-about"><h2>A bit about me</h2><p>Detroit, modern art, applied math, and the turns in between.</p><p id="interests"><a href="/about/#interests">What lights me up</a></p><a class="text-link" href="/about/">About Christy ${arrow}</a></section>`;
 write('index.html', page({title:owner, path:'/', description:'Christiana Wong is a data engineer, art enthusiast, and occasional writer from Detroit.', image:'/assets/sunrise.webp', body:home}));
 
-const archive = headline('Occasional writing', 'Essays and notes by Christiana Wong.', 'Writing') +
+const archive = headline('Occasional writing', 'Essays and notes by Christiana Wong.') +
   (featured ? `<section><header class="section-head"><h2>Featured</h2></header>${feature(featured)}</section>` : '') +
   `<section class="archive" aria-labelledby="archive-heading"><header class="section-head"><h2 id="archive-heading">Archive</h2></header>
-  <div class="filters" hidden><label>Search writing<input type="search" id="writing-query" placeholder="Search by title or text"></label>
+  <div class="archive-index"><div class="filters" hidden><label>Search writing<input type="search" id="writing-query" placeholder="Search by title or text"></label>
   <label>Category<select id="writing-category"><option value="">All categories</option>${categories.map(category => '<option>' + escape(category) + '</option>').join('')}</select></label></div>
-  <p class="archive-count" aria-live="polite"></p><p class="archive-empty" hidden>No pieces match your search.</p>
-  <ul class="writing-list">${articles.map(article => writingRow(article, true)).join('')}</ul></section>`;
+  <div class="archive-results"><p class="archive-count" aria-live="polite"></p><p class="archive-empty" hidden>No pieces match your search.</p>
+  <ul class="writing-list">${articles.map(article => writingRow(article, true)).join('')}</ul></div></div></section>`;
 write('writing/index.html', page({title:'Writing', path:'/writing/', description:'Browse the essays and notes of Christiana Wong.', body:archive}));
 
 for (const [i, article] of articles.entries()) {
@@ -206,7 +197,7 @@ for (const [i, article] of articles.entries()) {
   <article class="essay">
     <header class="essay-title"><a class="text-link" href="/writing/">Writing archive</a><p class="eyebrow">${metadata(article)}</p><h1>${escape(article.title)}</h1></header>
     ${article.cover ? '<figure class="essay-photo">' + cover(article) + (article.caption ? '<figcaption>' + escape(article.caption) + '</figcaption>' : '') + '</figure>' : ''}
-    <div class="prose" data-essay-body>${article.body}</div>
+    <div class="essay-reading"><p class="essay-byline">Christiana Wong</p><div class="prose" data-essay-body>${article.body}</div></div>
   </article>
   ${adjacent.length ? '<nav class="article-nav" aria-label="Adjacent articles">' + adjacent.map(([label,item]) => '<a href="' + item.path + '"><span class="eyebrow">' + label + '</span><strong>' + escape(item.title) + '</strong></a>').join('') + '</nav>' : ''}
   ${related.length ? '<section class="archive"><header class="section-head"><h2>Related writing</h2></header><ul class="writing-list">' + related.map(item => writingRow(item)).join('') + '</ul></section>' : ''}`;
