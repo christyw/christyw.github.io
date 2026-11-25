@@ -18,7 +18,7 @@ Open <http://localhost:3000>. Run `npm run build` again after editing an article
 
 1. Copy `_editorial/templates/article.md` into `_editorial/published/`. Its lowercase, hyphenated filename supplies the article URL. For example, `on-reading.md` becomes `/writing/on-reading/`.
 2. Fill in the title, description, category, and kind. Use `Essay` or `Note` for kind. The available categories are Life & Identity, Technology & Thinking, Art & Culture, Places & Travel, Field Notes, and Books.
-3. Supply a known publication date as a quoted `YYYY-MM-DD` value, or use `year` for a year-only entry. For a cover, add an optimized image to `assets/` and supply `cover`, `coverAlt`, and optionally `caption`. Set `featured: true` to select the piece for the home and archive feature. If multiple pieces are marked featured, the newest one is shown.
+3. Supply a known publication date as a quoted `YYYY-MM-DD` value, or use `year` for a year-only entry. For a cover, add an optimized image to `assets/` and supply `cover`, `coverAlt`, and optionally `caption`. Set `featured: true` to select the piece for the optional archive feature. If multiple pieces are marked featured, the newest one is shown.
 4. Run `npm run build` and commit the Markdown and generated files. The archive, sitemap, RSS feed, and article navigation update automatically.
 
 Keep unfinished work outside the published directory. `_editorial/editorial-backlog.md` and `_editorial/content-review.md` are excluded from the Pages website and visible in the public GitHub repository.

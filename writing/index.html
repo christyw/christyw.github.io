@@ -29,12 +29,7 @@ try { const theme = localStorage.getItem('cw-theme'); if (theme === 'light' || t
   <nav aria-label="Main navigation"><a href="/">Home</a><a href="/writing/" aria-current="page">Writing</a><a href="/bookshelf/">Bookshelf</a><a href="/playground/">Playground</a><a href="/now/">Now</a><a href="/about/">About</a></nav>
   <button class="theme" type="button" hidden aria-label="Dark mode" aria-pressed="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M20.6 15.3A9 9 0 0 1 8.7 3.4 9 9 0 1 0 20.6 15.3Z"/></svg></button>
 </header>
-<main id="main" class="shell" tabindex="-1"><header class="page-intro"><h1>Occasional writing</h1><p class="lede">Essays and notes by Christiana Wong.</p></header><section><header class="section-head"><h2>Featured</h2></header><article class="feature ">
-    <a class="feature-image" href="/writing/a-sunrise-hike/" tabindex="-1" aria-hidden="true"><img src="/assets/sunrise.webp" srcset="/assets/sunrise-small.webp 548w, /assets/sunrise.webp 975w" sizes="(max-width: 700px) 92vw, 72vw" alt="The desert at sunrise, seen from a high ridge" ></a>
-    <div class="feature-text"><p class="eyebrow">Places &amp; Travel <span aria-hidden="true">·</span> Essay</p>
-    <h3><a href="/writing/a-sunrise-hike/">A Sunrise Hike</a></h3>
-    <p>A hike in the dark, a red-sand horizon, and an unexpected discovery at the summit.</p><a class="text-link" href="/writing/a-sunrise-hike/">Read the essay <svg class="link-icon" width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><path d="M4 12 12 4M5 4h7v7"/></svg></a></div>
-  </article></section><section class="archive" aria-labelledby="archive-heading"><header class="section-head"><h2 id="archive-heading">Archive</h2></header>
+<main id="main" class="shell" tabindex="-1"><header class="page-intro"><h1>Occasional writing</h1><p class="lede">Essays and notes by Christiana Wong.</p></header><section class="archive" aria-labelledby="archive-heading"><header class="section-head"><h2 id="archive-heading">Archive</h2></header>
   <div class="archive-index"><div class="filters" hidden><label>Search writing<input type="search" id="writing-query" placeholder="Search by title or text"></label>
   <label>Category<select id="writing-category"><option value="">All categories</option><option>Life &amp; Identity</option><option>Technology &amp; Thinking</option><option>Art &amp; Culture</option><option>Places &amp; Travel</option><option>Field Notes</option><option>Books</option></select></label></div>
   <div class="archive-results"><p class="archive-count" aria-live="polite"></p><p class="archive-empty" hidden>No pieces match your search.</p>

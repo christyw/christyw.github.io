@@ -31,7 +31,7 @@ const articles = readdirSync('_editorial/published').filter(file => file.endsWit
   return {...meta, body, minutes, file, path: '/writing/' + slug + '/'};
 }).sort((a,b) => String(b.date || b.year || '').localeCompare(String(a.date || a.year || '')) || a.title.localeCompare(b.title));
 
-const featured = articles.find(article => article.featured) || articles[0];
+const featured = articles.find(article => article.featured);
 const routeFiles = new Set();
 function write(file, content) {
   mkdirSync(dirname(file), {recursive: true});
@@ -107,9 +107,8 @@ function cover(article, extra = '') {
   return `<img src="${escape(article.cover)}"${srcset} alt="${escape(article.coverAlt)}" ${extra}>`;
 }
 
-function feature(article, id = '') {
-  if (!article) return '<p>Published writing will appear here.</p>';
-  return `<article class="feature ${article.cover ? '' : 'without-picture'}"${id ? ' id="' + id + '"' : ''}>
+function feature(article) {
+  return `<article class="feature ${article.cover ? '' : 'without-picture'}">
     ${article.cover ? '<a class="feature-image" href="' + article.path + '" tabindex="-1" aria-hidden="true">' + cover(article) + '</a>' : ''}
     <div class="feature-text"><p class="eyebrow">${escape(article.category)} <span aria-hidden="true">·</span> ${escape(article.kind)}</p>
     <h3><a href="${article.path}">${escape(article.title)}</a></h3>
@@ -118,7 +117,7 @@ function feature(article, id = '') {
 }
 
 function writingRow(article, archive = false) {
-  return `<li class="writing-row"${archive ? ' data-entry data-category="' + escape(article.category) + '" data-search="' + escape([article.title,article.description,article.category,article.kind,article.body.replace(/<[^>]*>/g, ' ')].join(' ')) + '"' : ''}>
+  return `<li class="writing-row"${!archive && article.file === 'a-sunrise-hike.md' ? ' id="sunrise-card"' : ''}${archive ? ' data-entry data-category="' + escape(article.category) + '" data-search="' + escape([article.title,article.description,article.category,article.kind,article.body.replace(/<[^>]*>/g, ' ')].join(' ')) + '"' : ''}>
     <div><p class="eyebrow">${metadata(article)}</p><h3><a href="${article.path}">${escape(article.title)}</a></h3><p>${escape(article.description)}</p></div>
     <span class="row-link" aria-hidden="true">${arrow}</span>
   </li>`;
@@ -148,17 +147,16 @@ function bookItem(book, preview = false) {
 }
 
 const home = `<div class="front-spread">
-  <section class="home-hero" aria-labelledby="opening-line">
-    <div class="hero-copy"><h1 id="opening-line">I think a lot<br><em>and write<br class="display-break"> a little.</em></h1>
-    <div class="hero-context"><p class="lede">Engineer, art enthusiast, and perpetually curious person.</p>
-    <p class="itinerary">Detroit ${direction} New York ${direction} San Francisco</p></div></div>
-  </section>
+  <header class="home-hero"><h1>We’ll get to the point<br><em>eventually.</em></h1></header>
+  <aside class="hero-context" aria-label="About Christy">
+    <p class="lede">I’m Christy, a data engineer from Detroit. I like modern art, museums, books, and baking.</p>
+    <p class="itinerary">Detroit ${direction} New York ${direction} San Francisco</p>
+  </aside>
   <section class="home-selection" id="writing">
-    <header class="section-head"><h2>Selected writing</h2><a class="text-link" href="/writing/">Archive ${arrow}</a></header>
-    ${feature(featured, featured?.file === 'a-sunrise-hike.md' ? 'sunrise-card' : '')}
+    <header class="section-head"><h2>Writing</h2><a class="text-link" href="/writing/">Archive ${arrow}</a></header>
+    ${articles.length ? '<ul class="writing-list">' + articles.slice(0, 4).map(article => writingRow(article)).join('') + '</ul>' : '<p>Published writing will appear here.</p>'}
   </section>
 </div>
-${articles.length > 1 ? '<ul class="writing-list">' + articles.filter(a => a !== featured).slice(0,3).map(a => writingRow(a)).join('') + '</ul>' : ''}
 <div class="home-columns">
   <section class="home-section" id="now">
     <header class="section-head"><h2>Lately</h2><a class="text-link" href="/now/">Now ${arrow}</a></header>
@@ -179,7 +177,7 @@ ${articles.length > 1 ? '<ul class="writing-list">' + articles.filter(a => a !==
   </div>
 </section>
 <section id="about" class="home-section home-about"><h2>A bit about me</h2><p>Detroit, modern art, applied math, and the turns in between.</p><p id="interests"><a href="/about/#interests">What lights me up</a></p><a class="text-link" href="/about/">About Christy ${arrow}</a></section>`;
-write('index.html', page({title:owner, path:'/', description:'Christiana Wong is a data engineer, art enthusiast, and occasional writer from Detroit.', image:'/assets/sunrise.webp', body:home}));
+write('index.html', page({title:owner, path:'/', description:'Christiana Wong is a data engineer, art enthusiast, and occasional writer from Detroit.', body:home}));
 
 const archive = headline('Occasional writing', 'Essays and notes by Christiana Wong.') +
   (featured ? `<section><header class="section-head"><h2>Featured</h2></header>${feature(featured)}</section>` : '') +

@@ -6,7 +6,6 @@ kind: Essay
 description: A hike in the dark, a red-sand horizon, and an unexpected discovery at the summit.
 cover: /assets/sunrise.webp
 coverAlt: The desert at sunrise, seen from a high ridge
-featured: true
 ---
 
 It was my idea to do this sunrise hike.
