@@ -1,0 +1,7 @@
+# GitHub Pages serves the generated static HTML from the existing branch source.
+exclude:
+  - _editorial
+  - package.json
+  - package-lock.json
+  - README.md
+  - node_modules

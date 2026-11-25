@@ -1,70 +1,36 @@
-# Christiana Wong — Personal Gallery Website
+# Christiana Wong’s website
 
-A horizontal-scroll museum experience. Navigate left and right through rooms like walking the ground floor of a museum.
+An editorial personal site with a writing archive, bookshelf, and interactive playground. GitHub Pages serves the committed HTML, CSS, and JavaScript directly from the repository root. Node runs only when editing or previewing the site.
 
-## How to Get This Live (GitHub Pages — Free)
+## Preview locally
 
-### Step 1: Create a GitHub Account
-Go to [github.com](https://github.com) and sign up for a free account if you don't have one.
+With Node.js 20 or newer, run:
 
-### Step 2: Create a New Repository
-1. Click the **+** button (top right) → **New repository**
-2. Name it exactly: `your-username.github.io`  
-   *(replace "your-username" with your actual GitHub username)*
-3. Set it to **Public**
-4. Click **Create repository**
+```sh
+npm ci
+npm run build
+npm run dev
+```
 
-### Step 3: Upload Your File
-1. In your new repository, click **Add file** → **Upload files**
-2. Drag and drop `index.html` from this folder
-3. Scroll down, click **Commit changes**
+Open <http://localhost:3000>. Run `npm run build` again after editing an article, template, or data file, then refresh the browser. Use `PORT=3001 npm run dev` if port 3000 is occupied.
 
-### Step 4: Your Site is Live!
-Wait 1–2 minutes, then visit:  
-`https://your-username.github.io`
+## Add an article
 
-That's it. Free hosting, forever.
+1. Copy `_editorial/templates/article.md` into `_editorial/published/`. Its lowercase, hyphenated filename supplies the article URL. For example, `on-reading.md` becomes `/writing/on-reading/`.
+2. Fill in the title, description, category, and kind. Use `Essay` or `Note` for kind. The available categories are Life & Identity, Technology & Thinking, Art & Culture, Places & Travel, Field Notes, and Books.
+3. Supply a known publication date as a quoted `YYYY-MM-DD` value, or use `year` for a year-only entry. For a cover, add an optimized image to `assets/` and supply `cover`, `coverAlt`, and optionally `caption`. Set `featured: true` to select the piece for the home and archive feature. If multiple pieces are marked featured, the newest one is shown.
+4. Run `npm run build` and commit the Markdown and generated files. The archive, sitemap, RSS feed, and article navigation update automatically.
 
----
+Keep unfinished work outside the published directory. `_editorial/editorial-backlog.md` and `_editorial/content-review.md` are excluded from the Pages website and visible in the public GitHub repository.
 
-## Connecting Your Custom Domain
+## Add a book or update Now
 
-### In GitHub:
-1. Go to your repository → **Settings** → **Pages**
-2. Under "Custom domain", type your domain (e.g. `christianawong.com`)
-3. Click **Save**
-4. GitHub will show you some DNS records to add
+- Add a record to `_editorial/books.json` with a unique lowercase `id`, `title`, and `author`. Optional fields include `color` (olive, rust, blue, plum, ochre), `isbn`, `status`, `finished`, `reflection`, `passage`, and `related` (article slugs). An image at `assets/covers/<id>.webp` takes precedence over the typographic cover. The first three books appear on the homepage.
+- Update `_editorial/now.json` and its `updated` date. Only filled sections appear in the homepage preview.
+- Regenerate and commit the output after either edit.
 
-### In Your Domain Registrar (Namecheap, GoDaddy, Google Domains, etc.):
-Add these DNS records (GitHub provides the exact values, but typically):
+## Deployment
 
-| Type  | Host | Value                |
-|-------|------|----------------------|
-| A     | @    | 185.199.108.153      |
-| A     | @    | 185.199.109.153      |
-| A     | @    | 185.199.110.153      |
-| A     | @    | 185.199.111.153      |
-| CNAME | www  | your-username.github.io |
+Review the draft PR and preview before merging. GitHub Pages currently publishes the root of `main`. After an approved merge, check the Pages build, then open <https://www.christianawong.com> and spot-check the home page, essay, and feed. The existing custom domain and CNAME require no changes. If a published revision needs to be rolled back, revert it through the usual PR process.
 
-Wait up to 24 hours for DNS to propagate. GitHub will automatically give you HTTPS (the padlock).
-
----
-
-## Navigating the Gallery
-- **Arrow buttons** on screen
-- **Keyboard** ← → arrow keys
-- **Touch/swipe** on mobile
-- **Nav bar** room names at the top
-- **Dots** at the bottom
-
-## Rooms
-1. Entrance Hall — fountain courtyard
-2. About — Detroit & Yale
-3. Interests — sports, books, cooking
-4. Professional — Airbnb.org
-5. Travel — sunrise hike excerpt
-6. Writing — notebook
-7. Contact — exit hall
-
-## Editing Content
-Open `index.html` in any text editor (TextEdit, Notepad, VS Code) and find the room you want to edit. Each room is clearly marked with comments like `<!-- ROOM 1 · ABOUT -->`.
+The original photo files stay at their original URLs. The site uses smaller WebP derivatives in its layouts. Book artwork is sourced from the previous site’s Amazon and Open Library image URLs. Instrument Serif, Inter, and Source Serif 4 are served locally under their bundled Open Font Licenses.
