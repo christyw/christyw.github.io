@@ -14,7 +14,6 @@ const escape = value => String(value ?? '').replace(/[&<>"']/g, char => ({
   '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
 })[char]);
 const arrow = '<svg class="link-icon" width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><path d="M4 12 12 4M5 4h7v7"/></svg>';
-const direction = '<svg class="direction-icon" width="13" height="10" viewBox="0 0 16 12" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><path d="M1 6h13m-4-4 4 4-4 4"/></svg>';
 const nav = [['Home','/'], ['Writing','/writing/'], ['Bookshelf','/bookshelf/'], ['Playground','/playground/'], ['Now','/now/'], ['About','/about/']];
 const articles = readdirSync('_editorial/published').filter(file => file.endsWith('.md')).map(file => {
   const input = readFileSync('_editorial/published/' + file, 'utf8');
@@ -147,10 +146,9 @@ function bookItem(book, preview = false) {
 }
 
 const home = `<div class="front-spread">
-  <header class="home-hero"><h1>We’ll get to the point<br><em>eventually.</em></h1></header>
+  <header class="home-hero"><h1><span>We’ll get to</span> <span>the point</span> <span class="headline-ending">eventually<span class="headline-period">.</span></span></h1></header>
   <aside class="hero-context" aria-label="About Christy">
     <p class="lede">I’m Christy, a data engineer from Detroit. I like modern art, museums, books, and baking.</p>
-    <p class="itinerary">Detroit ${direction} New York ${direction} San Francisco</p>
   </aside>
   <section class="home-selection" id="writing">
     <header class="section-head"><h2>Writing</h2><a class="text-link" href="/writing/">Archive ${arrow}</a></header>
