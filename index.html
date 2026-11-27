@@ -34,42 +34,36 @@ try { const theme = localStorage.getItem('cw-theme'); if (theme === 'light' || t
   <aside class="hero-context" aria-label="About Christy">
     <p class="lede">I’m Christy, a data engineer from Detroit. I like modern art, museums, books, and baking.</p>
   </aside>
-  <section class="home-selection" id="writing">
-    <header class="section-head"><h2>Writing</h2><a class="text-link" href="/writing/">Archive <svg class="link-icon" width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><path d="M4 12 12 4M5 4h7v7"/></svg></a></header>
+</div>
+<div class="home-index">
+  <section class="home-index-row home-selection" id="writing">
+    <header class="section-head"><h2><a href="/writing/">Writing <svg class="link-icon" width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><path d="M4 12 12 4M5 4h7v7"/></svg></a></h2></header>
     <ul class="writing-list"><li class="writing-row" id="sunrise-card">
     <div><p class="eyebrow">Essay <span aria-hidden="true">·</span> Places &amp; Travel <span aria-hidden="true">·</span> <time datetime="2023">2023</time> <span aria-hidden="true">·</span> 1 min read</p><h3><a href="/writing/a-sunrise-hike/">A Sunrise Hike</a></h3><p>A hike in the dark, a red-sand horizon, and an unexpected discovery at the summit.</p></div>
     <span class="row-link" aria-hidden="true"><svg class="link-icon" width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><path d="M4 12 12 4M5 4h7v7"/></svg></span>
   </li></ul>
   </section>
-</div>
-<div class="home-columns">
-  <section class="home-section" id="now">
-    <header class="section-head"><h2>Lately</h2><a class="text-link" href="/now/">Now <svg class="link-icon" width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><path d="M4 12 12 4M5 4h7v7"/></svg></a></header>
-    <dl class="lately"><dt>Working</dt><dd>I&#39;m a data engineer at OpenAI.</dd></dl>
+  <section class="home-index-row" id="now">
+    <header class="section-head"><h2><a href="/now/">Lately <svg class="link-icon" width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><path d="M4 12 12 4M5 4h7v7"/></svg></a></h2></header>
+    <dl class="lately"><div><dt>Working</dt><dd>I&#39;m a data engineer at OpenAI.</dd></div></dl>
   </section>
-  <section class="home-section" id="reading">
-    <header class="section-head"><h2>Bookshelf</h2><a class="text-link" href="/bookshelf/">Full shelf <svg class="link-icon" width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><path d="M4 12 12 4M5 4h7v7"/></svg></a></header>
-    <ul class="preview-books"><li><a class="preview-book" href="/bookshelf/#pachinko"><span class="book-cover olive" aria-hidden="true">
-    <span class="book-type"><strong>Pachinko</strong><small>Min Jin Lee</small></span>
-    <img src="/assets/covers/pachinko.webp" alt="" width="330" height="510" loading="lazy">
-  </span><span>Pachinko</span></a></li><li><a class="preview-book" href="/bookshelf/#everything"><span class="book-cover rust" aria-hidden="true">
-    <span class="book-type"><strong>Everything I Never Told You</strong><small>Celeste Ng</small></span>
-    <img src="/assets/covers/everything.webp" alt="" width="330" height="510" loading="lazy">
-  </span><span>Everything I Never Told You</span></a></li><li><a class="preview-book" href="/bookshelf/#chemistry"><span class="book-cover blue" aria-hidden="true">
-    <span class="book-type"><strong>Chemistry</strong><small>Weike Wang</small></span>
-    <img src="/assets/covers/chemistry.webp" alt="" width="330" height="510" loading="lazy">
-  </span><span>Chemistry</span></a></li></ul>
+  <section class="home-index-row" id="reading">
+    <header class="section-head"><h2><a href="/bookshelf/">Bookshelf <svg class="link-icon" width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><path d="M4 12 12 4M5 4h7v7"/></svg></a></h2></header>
+    <ul class="preview-books"><li><a href="/bookshelf/#pachinko">Pachinko</a><span>Min Jin Lee</span></li><li><a href="/bookshelf/#everything">Everything I Never Told You</a><span>Celeste Ng</span></li><li><a href="/bookshelf/#chemistry">Chemistry</a><span>Weike Wang</span></li></ul>
   </section>
-</div>
-<section class="home-section" id="playground">
-  <header class="section-head"><h2>Playground</h2><a class="text-link" href="/playground/">All experiments <svg class="link-icon" width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><path d="M4 12 12 4M5 4h7v7"/></svg></a></header>
-  <div class="home-garden">
-    <div><p class="eyebrow">Creative coding</p><h3><a href="/playground/#garden">Mathematical garden</a></h3><p>Turn the angle to see how a small change rearranges an entire garden.</p>
-    <label for="preview-angle">Growth angle <output for="preview-angle"></output></label><input id="preview-angle" type="range" min="130" max="145" value="137.5" step="0.1" data-angle></div>
-    <svg viewBox="0 0 360 320" data-garden role="img" aria-label="Generative botanical pattern"></svg>
-  </div>
-</section>
-<section id="about" class="home-section home-about"><h2>A bit about me</h2><p>Detroit, modern art, applied math, and the turns in between.</p><p id="interests"><a href="/about/#interests">What lights me up</a></p><a class="text-link" href="/about/">About Christy <svg class="link-icon" width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><path d="M4 12 12 4M5 4h7v7"/></svg></a></section></main>
+  <section class="home-index-row" id="playground">
+    <header class="section-head"><h2><a href="/playground/">Playground <svg class="link-icon" width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><path d="M4 12 12 4M5 4h7v7"/></svg></a></h2></header>
+    <div class="home-garden">
+      <div><h3><a href="/playground/#garden">Mathematical garden</a></h3><p>Turn the angle to see how a small change rearranges an entire garden.</p>
+      <label for="preview-angle">Growth angle <output for="preview-angle"></output></label><input id="preview-angle" type="range" min="130" max="145" value="137.5" step="0.1" data-angle></div>
+      <svg viewBox="0 0 360 320" data-garden role="img" aria-label="Generative botanical pattern"></svg>
+    </div>
+  </section>
+  <section class="home-index-row home-about" id="about">
+    <header class="section-head"><h2><a href="/about/">About <svg class="link-icon" width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><path d="M4 12 12 4M5 4h7v7"/></svg></a></h2></header>
+    <div><p>Detroit, modern art, applied math, and the turns in between.</p><p id="interests"><a href="/about/#interests">What lights me up</a></p></div>
+  </section>
+</div></main>
 <footer class="site-footer shell" id="contact">
   <div><a class="footer-title" href="/about/#contact-note">Let's talk.</a><p>Made with curiosity.</p></div>
   <nav aria-label="Contact and feeds"><a href="mailto:msgchristy@gmail.com">Email</a><a href="https://github.com/christy-wong">GitHub</a><a href="https://www.linkedin.com/in/christianawong/">LinkedIn</a><a href="https://www.instagram.com/christy.wng/">Instagram</a><a href="https://x.com/christywong0">X</a><a href="/feed.xml">RSS</a></nav>

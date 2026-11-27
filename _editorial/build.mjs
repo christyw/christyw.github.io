@@ -130,8 +130,7 @@ function bookCover(book) {
   </span>`;
 }
 
-function bookItem(book, preview = false) {
-  if (preview) return `<li><a class="preview-book" href="/bookshelf/#${escape(book.id)}">${bookCover(book)}<span>${escape(book.title)}</span></a></li>`;
+function bookItem(book) {
   const optional = [
     ['Reading status', book.status], ['Finished', book.finished], ['Reflection', book.reflection]
   ].filter(([,value]) => value).map(([label, value]) => '<dt>' + label + '</dt><dd>' + escape(value) + '</dd>').join('');
@@ -150,31 +149,35 @@ const home = `<div class="front-spread">
   <aside class="hero-context" aria-label="About Christy">
     <p class="lede">I’m Christy, a data engineer from Detroit. I like modern art, museums, books, and baking.</p>
   </aside>
-  <section class="home-selection" id="writing">
-    <header class="section-head"><h2>Writing</h2><a class="text-link" href="/writing/">Archive ${arrow}</a></header>
+</div>
+<div class="home-index">
+  <section class="home-index-row home-selection" id="writing">
+    <header class="section-head"><h2><a href="/writing/">Writing ${arrow}</a></h2></header>
     ${articles.length ? '<ul class="writing-list">' + articles.slice(0, 4).map(article => writingRow(article)).join('') + '</ul>' : '<p>Published writing will appear here.</p>'}
   </section>
-</div>
-<div class="home-columns">
-  <section class="home-section" id="now">
-    <header class="section-head"><h2>Lately</h2><a class="text-link" href="/now/">Now ${arrow}</a></header>
+  <section class="home-index-row" id="now">
+    <header class="section-head"><h2><a href="/now/">Lately ${arrow}</a></h2></header>
     <dl class="lately">${Object.entries(now.sections).filter(([,value]) => value).slice(0,4).map(([key,value]) =>
-      '<dt>' + escape(key) + '</dt><dd>' + escape(value) + '</dd>').join('')}</dl>
+      '<div><dt>' + escape(key) + '</dt><dd>' + escape(value) + '</dd></div>').join('')}</dl>
   </section>
-  <section class="home-section" id="reading">
-    <header class="section-head"><h2>Bookshelf</h2><a class="text-link" href="/bookshelf/">Full shelf ${arrow}</a></header>
-    <ul class="preview-books">${books.slice(0,3).map(book => bookItem(book,true)).join('')}</ul>
+  <section class="home-index-row" id="reading">
+    <header class="section-head"><h2><a href="/bookshelf/">Bookshelf ${arrow}</a></h2></header>
+    <ul class="preview-books">${books.slice(0,3).map(book =>
+      '<li><a href="/bookshelf/#' + escape(book.id) + '">' + escape(book.title) + '</a><span>' + escape(book.author) + '</span></li>').join('')}</ul>
   </section>
-</div>
-<section class="home-section" id="playground">
-  <header class="section-head"><h2>Playground</h2><a class="text-link" href="/playground/">All experiments ${arrow}</a></header>
-  <div class="home-garden">
-    <div><p class="eyebrow">Creative coding</p><h3><a href="/playground/#garden">Mathematical garden</a></h3><p>Turn the angle to see how a small change rearranges an entire garden.</p>
-    <label for="preview-angle">Growth angle <output for="preview-angle"></output></label><input id="preview-angle" type="range" min="130" max="145" value="137.5" step="0.1" data-angle></div>
-    <svg viewBox="0 0 360 320" data-garden role="img" aria-label="Generative botanical pattern"></svg>
-  </div>
-</section>
-<section id="about" class="home-section home-about"><h2>A bit about me</h2><p>Detroit, modern art, applied math, and the turns in between.</p><p id="interests"><a href="/about/#interests">What lights me up</a></p><a class="text-link" href="/about/">About Christy ${arrow}</a></section>`;
+  <section class="home-index-row" id="playground">
+    <header class="section-head"><h2><a href="/playground/">Playground ${arrow}</a></h2></header>
+    <div class="home-garden">
+      <div><h3><a href="/playground/#garden">Mathematical garden</a></h3><p>Turn the angle to see how a small change rearranges an entire garden.</p>
+      <label for="preview-angle">Growth angle <output for="preview-angle"></output></label><input id="preview-angle" type="range" min="130" max="145" value="137.5" step="0.1" data-angle></div>
+      <svg viewBox="0 0 360 320" data-garden role="img" aria-label="Generative botanical pattern"></svg>
+    </div>
+  </section>
+  <section class="home-index-row home-about" id="about">
+    <header class="section-head"><h2><a href="/about/">About ${arrow}</a></h2></header>
+    <div><p>Detroit, modern art, applied math, and the turns in between.</p><p id="interests"><a href="/about/#interests">What lights me up</a></p></div>
+  </section>
+</div>`;
 write('index.html', page({title:owner, path:'/', description:'Christiana Wong is a data engineer, art enthusiast, and occasional writer from Detroit.', body:home}));
 
 const archive = headline('Occasional writing', 'Essays and notes by Christiana Wong.') +
