@@ -139,7 +139,7 @@ function amazonBookLink(book) {
   if (!/^[A-Z0-9]{10}$/.test(book.amazonAsin)) throw new Error('Invalid Amazon ASIN for ' + book.title);
   const url = new URL('/dp/' + book.amazonAsin, 'https://www.amazon.com');
   if (amazonTrackingId) url.searchParams.set('tag', amazonTrackingId);
-  return `<a class="book-shop" href="${escape(url.href)}"${amazonTrackingId ? ' rel="sponsored"' : ''}>Amazon${amazonTrackingId ? ' (paid link)' : ''}<span class="visually-hidden"> for ${escape(book.title)}</span></a>`;
+  return `<a class="book-shop" href="${escape(url.href)}"${amazonTrackingId ? ' rel="sponsored"' : ''}>Amazon<span class="visually-hidden"> for ${escape(book.title)}</span></a>`;
 }
 
 function bookItem(book) {

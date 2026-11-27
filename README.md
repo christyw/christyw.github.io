@@ -31,7 +31,7 @@ Keep unfinished work outside the published directory. `_editorial/editorial-back
 
 ### Amazon Associates links
 
-Set `trackingId` in `_editorial/amazon.json` to the Amazon.com Associates tracking ID for this site, then rebuild. A configured ID adds the `tag` parameter, per-link disclosure, and Amazon Associates statement to the bookshelf. An empty value produces regular Amazon links.
+Set `trackingId` in `_editorial/amazon.json` to the Amazon.com Associates tracking ID for this site, then rebuild. A configured ID adds the `tag` parameter, sponsored link markup, and Amazon Associates statement to the bookshelf. An empty value produces regular Amazon links.
 
 ## Deployment
 
