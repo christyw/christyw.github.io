@@ -87,7 +87,7 @@ try { const theme = localStorage.getItem('cw-theme'); if (theme === 'light' || t
 </header>
 <main id="main" class="shell" tabindex="-1">${body}</main>
 <footer class="site-footer shell" id="contact">
-  <div><a class="footer-title" href="/about/#contact-note">Contact</a><p>Made with curiosity.</p></div>
+  <p>Made with curiosity.</p>
   <nav aria-label="Contact and feeds">${socialLinks}<a href="/feed.xml">RSS</a></nav>
 </footer>
 </body>
@@ -237,7 +237,7 @@ const biography = headline('A bit about me', 'Christiana Wong, also known as Chr
     <p>I worked as a data engineer at Airbnb.org, supporting disaster response and emergency housing. These days I’m a data engineer at OpenAI. I’ve lived in New York and San Francisco.</p>
   </div><figure><img src="/assets/portrait.webp" alt="Christiana Wong" width="800" height="800"></figure></div>
   <section class="about-note" id="interests"><h2>What lights me up</h2><p>Museums, modern art, reading, running, tennis, soccer, snowboarding, dance, guitar, baking, and travel.</p></section>
-  <section class="about-note" id="contact-note"><h2>Contact</h2><p>${profile.contactIntroduction}</p><p class="inline-links">${socialLinks}</p></section>`;
+  <section class="about-note" id="contact-note"><h2>Links</h2><p class="inline-links">${socialLinks}</p></section>`;
 write('about/index.html', page({title:'About', path:'/about/', description:'Christiana Wong on Detroit, art, mathematics, and engineering.', body:biography}));
 
 write('404.html', page({title:'Page not found', path:'/404.html', description:'This page has wandered off.', noindex:true,

@@ -230,9 +230,7 @@ figcaption { color: var(--soft); font-size: .875rem; padding-top: .6rem; }
   display: flex; justify-content: space-between; align-items: end; flex-wrap: wrap; gap: 1.3rem;
   border-top: 1px solid var(--heading); padding: 1.4rem 0 2rem; margin-top: 2rem;
 }
-.footer-title { color: var(--heading); font: 2.25rem/1 var(--display); text-decoration: none; }
 .site-footer p, .site-footer nav { font-size: .85rem; color: var(--soft); }
-.site-footer p { margin-top: .35rem; }
 .site-footer nav { display: flex; flex-wrap: wrap; gap: .55rem 1.15rem; }
 
 @media (max-width: 860px) {
