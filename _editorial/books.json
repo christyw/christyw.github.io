@@ -1,0 +1,7 @@
+[
+  {"id":"pachinko","title":"Pachinko","author":"Min Jin Lee","color":"olive","isbn":"9781455563920"},
+  {"id":"everything","title":"Everything I Never Told You","author":"Celeste Ng","color":"rust","isbn":"9780143127550"},
+  {"id":"chemistry","title":"Chemistry","author":"Weike Wang","color":"blue","isbn":"9780525432227"},
+  {"id":"opposite","title":"The Opposite of Loneliness","author":"Marina Keegan","color":"plum","isbn":"9781476753616"},
+  {"id":"salt","title":"Salt, Fat, Acid, Heat","author":"Samin Nosrat","color":"ochre","isbn":"9781476753836"}
+]

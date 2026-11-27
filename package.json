@@ -1,0 +1,14 @@
+{
+  "name": "christiana-wong-editorial",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node _editorial/build.mjs",
+    "dev": "node _editorial/preview.mjs"
+  },
+  "engines": { "node": ">=20" },
+  "devDependencies": {
+    "marked": "15.0.12",
+    "yaml": "2.8.2"
+  }
+}
