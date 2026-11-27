@@ -50,7 +50,7 @@ function metadata(article) {
 
 const socialLinks = Object.entries(profile.socials).map(([label, url]) => '<a href="' + escape(url) + '">' + escape(label) + '</a>').join('');
 
-function page({title, path, description, current = path, image, kind = 'website', body, noindex = false}) {
+function page({title, path, description, current = path, image, kind = 'website', body, noindex = false, script}) {
   const name = path === '/' ? owner : title + ' · ' + owner;
   const preview = image || '/assets/portrait.webp';
   return `<!doctype html>
@@ -75,7 +75,7 @@ ${noindex ? '<meta name="robots" content="noindex">' : ''}
 <script>
 try { const theme = localStorage.getItem('cw-theme'); if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme; } catch {}
 </script>
-<script src="/assets/site.js" defer></script>
+<script src="/assets/site.js" defer></script>${script ? '\n<script src="' + escape(script) + '" defer></script>' : ''}
 </head>
 <body class="${path === '/' ? 'front-page' : kind === 'article' ? 'article-page' : 'inside-page'}">
 <a class="skip" href="#main">Skip to content</a>
@@ -179,25 +179,77 @@ for (const [i, article] of articles.entries()) {
 write('bookshelf/index.html', page({title:'Bookshelf', path:'/bookshelf/', description:'A few favorite books from Christiana Wong’s bookshelf.',
   body:headline('Books I’ve kept', profile.booksIntroduction, 'Bookshelf') + `<ul class="books-grid">${books.map(book => bookItem(book)).join('')}</ul>`}));
 
-const playground = headline('Playground', 'Small experiments in mathematics and color.') + `<div class="experiments">
-<section id="garden" class="experiment"><header class="section-head"><h2>Mathematical garden</h2></header>
-  <div class="experiment-grid"><div class="experiment-controls"><p>Each seed turns by the same angle before taking its place. Around 137.5°, the spirals resemble the patterns in a sunflower.</p>
-    <label for="angle">Growth angle <output for="angle"></output></label><input id="angle" type="range" min="120" max="155" step=".1" value="137.5" data-angle>
-    <label for="seeds">Seeds <output for="seeds"></output></label><input id="seeds" type="range" min="30" max="500" value="270" data-seeds>
-    <label for="spread">Seed size <output for="spread"></output></label><input id="spread" type="range" min="2" max="9" value="5" data-spread>
-    <button type="button" data-reset>Reset garden</button></div>
-    <svg viewBox="0 0 360 320" data-garden role="img" aria-label="Generative botanical pattern"></svg>
+function lookingArtwork(reveal) {
+  const credit = '<a href="https://www.artic.edu/artworks/8991/improvisation-no-30-cannons">Vasily Kandinsky, <cite>Improvisation No. 30 (Cannons)</cite>, 1913</a> · Art Institute of Chicago, public domain';
+  return `<figure class="play-artwork">
+    <img src="/assets/kandinsky-improvisation-30.webp" width="1060" height="1059" ${reveal ? '' : 'loading="lazy"'} alt="An abstract painting with bright washes of color, sweeping black lines, and small angular shapes.">
+    <figcaption${reveal ? ' data-art-credit hidden' : ''}>${credit}</figcaption>
+  </figure>`;
+}
+
+const playground = headline('Playground', 'A few things to try when you have a minute.') + `
+<nav class="play-index" aria-label="Playground experiments">
+  <a href="#look">Look Before the Label</a>
+  <a href="#minute">One Minute With a Painting</a>
+  <a href="#smaller">Make It Smaller</a>
+  <a href="#asterisk">Advice With an Asterisk</a>
+</nav>
+<section class="play-station" id="look" aria-labelledby="look-title">
+  <header class="section-head"><h2 id="look-title">Look Before the Label</h2></header>
+  <div class="play-gallery">
+    ${lookingArtwork(true)}
+    <div class="play-panel">
+      <p class="play-question">Where did your eye go first?</p>
+      <p>Pick a detail in your head. Then try looking at the painting through two different labels.</p>
+      <div data-looking-controls hidden>
+        <button type="button" data-reveal aria-controls="art-labels" aria-expanded="false">Reveal the labels</button>
+        <div id="art-labels" hidden>
+          <details><summary>Read it like music</summary><p>Follow a black line as if it were a phrase in a piece of music. Notice where it speeds up, where another line interrupts, and where the color gives it room.</p></details>
+          <details><summary>Read it as a scene</summary><p>Look for what might be a building, a crowd, or a cannon. Once you think you’ve found one, does the rest of the painting start to look different?</p></details>
+          <p class="play-aside">Look again. Does your eye still land in the same place?</p>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
-<section id="color" class="experiment"><header class="section-head"><h2>Color atelier</h2></header>
-  <p>Build a five-color palette around a hue. Select any swatch to copy its hex value.</p>
-  <div class="palette-controls"><div><label for="hue">Base hue <output for="hue"></output></label><input id="hue" type="range" min="0" max="359" value="29"></div>
-  <label for="harmony">Harmony<select id="harmony"><option value="analogous">Analogous</option><option value="complementary">Complementary</option><option value="triadic">Triadic</option></select></label>
-  <button type="button" data-palette-shuffle>Random hue</button></div>
-  <div class="swatches" aria-label="Palette colors"></div><p class="copy-status" role="status"></p>
+<section class="play-station" id="minute" aria-labelledby="minute-title">
+  <header class="section-head"><h2 id="minute-title">One Minute With a Painting</h2></header>
+  <div class="play-gallery play-gallery--smaller">
+    ${lookingArtwork(false)}
+    <div class="play-panel">
+      <p>Stay with the painting for one minute. Start wherever your attention lands.</p>
+      <div data-minute-controls hidden>
+        <div class="play-clock" data-timer role="timer" aria-label="Time remaining">1:00</div>
+        <p class="play-question" data-prompt aria-live="polite"></p>
+        <div class="play-actions"><button type="button" data-timer-toggle>Start</button><button type="button" data-timer-reset disabled>Reset</button></div>
+      </div>
+      <noscript><p>Find a color, follow an edge, then look at a part you’ve passed over.</p></noscript>
+    </div>
+  </div>
 </section>
-<noscript><p>Enable JavaScript to use the interactive experiments.</p></noscript></div>`;
-write('playground/index.html', page({title:'Playground', path:'/playground/', description:'Interactive experiments in generative art and color.', body:playground}));
+<section class="play-station" id="smaller" aria-labelledby="smaller-title">
+  <header class="section-head"><h2 id="smaller-title">Make It Smaller</h2></header>
+  <p class="play-intro">Take something you’re putting off and turn it into a step you could do right now.</p>
+  <form class="play-task" data-small-task hidden>
+    <div><label for="big-task">What are you putting off?</label><input id="big-task" name="task" placeholder="Work on my taxes" maxlength="160" required></div>
+    <div><label for="small-step">What’s the first thing you could physically do?</label><input id="small-step" name="step" placeholder="Find one W-2" maxlength="160" required></div>
+    <div class="play-actions"><button type="submit">Keep this step</button><button type="button" data-task-clear>Clear</button></div>
+    <p class="play-aside">Saved in this browser when you choose to keep a step.</p>
+    <p class="play-result" data-task-result role="status" hidden></p>
+  </form>
+</section>
+<section class="play-station" id="asterisk" aria-labelledby="asterisk-title">
+  <header class="section-head"><h2 id="asterisk-title">Advice With an Asterisk</h2></header>
+  <div class="play-advice" data-advice>
+    <div data-advice-card><p class="play-quote">Trust the process.</p><details><summary>Read the asterisk</summary><p>Check occasionally that there is a process.</p></details></div>
+    <div data-advice-card hidden><p class="play-quote">Stay the course.</p><details><summary>Read the asterisk</summary><p>Check that you still want to go where it leads.</p></details></div>
+    <div data-advice-card hidden><p class="play-quote">Sleep on it.</p><details><summary>Read the asterisk</summary><p>Set an alarm if the decision is due at nine.</p></details></div>
+    <button type="button" data-next-advice hidden>Another one</button>
+    <p class="play-aside" data-advice-status role="status" hidden></p>
+  </div>
+</section>
+<noscript><p>Enable JavaScript for the interactive controls.</p></noscript>`;
+write('playground/index.html', page({title:'Playground', path:'/playground/', description:'Four small experiments in art, attention, and getting started.', body:playground, script:'/assets/playground.js'}));
 
 const nowBody = headline('Now', 'What I’m up to these days.') +
   `<p class="eyebrow now-date">Last updated <time datetime="${escape(now.updated)}">${calendar(now.updated)}</time></p>
