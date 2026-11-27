@@ -25,12 +25,12 @@ Keep unfinished work outside the published directory. `_editorial/editorial-back
 
 ## Add a book or update Now
 
-- Add a record to `_editorial/books.json` with a unique lowercase `id`, `title`, and `author`. Optional fields include `color` (olive, rust, blue, plum, ochre), `isbn`, `status`, `finished`, `reflection`, `passage`, and `related` (article slugs). An image at `assets/covers/<id>.webp` takes precedence over the typographic cover. The first three books appear on the homepage.
-- Update `_editorial/now.json` and its `updated` date. Only filled sections appear in the homepage preview.
+- Add a record to `_editorial/books.json` with a unique lowercase `id`, `title`, and `author`. Optional fields include `color` (olive, rust, blue, plum, ochre), `isbn`, `status`, `finished`, `reflection`, `passage`, and `related` (article slugs). An image at `assets/covers/<id>.webp` takes precedence over the typographic cover.
+- Update `_editorial/now.json` and its `updated` date.
 - Regenerate and commit the output after either edit.
 
 ## Deployment
 
 Review the draft PR and preview before merging. GitHub Pages currently publishes the root of `main`. After an approved merge, check the Pages build, then open <https://www.christianawong.com> and spot-check the home page, essay, and feed. The existing custom domain and CNAME require no changes. If a published revision needs to be rolled back, revert it through the usual PR process.
 
-The original photo files stay at their original URLs. The site uses smaller WebP derivatives in its layouts. Book artwork is sourced from the previous site’s Amazon and Open Library image URLs. Instrument Serif, Inter, and Source Serif 4 are served locally under their bundled Open Font Licenses.
+The original photo files stay at their original URLs. The site uses smaller WebP derivatives in its layouts. Book artwork is sourced from the previous site’s Amazon and Open Library image URLs. Inter and Source Serif 4 are served locally under their bundled Open Font Licenses.

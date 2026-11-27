@@ -1,3 +1,17 @@
+if (location.pathname === '/') {
+  const previousSections = new Map([
+    ['#writing', '/writing/'], ['#sunrise-card', '/writing/a-sunrise-hike/'],
+    ['#reading', '/bookshelf/'], ['#playground', '/playground/'],
+    ['#now', '/now/'], ['#about', '/about/'], ['#interests', '/about/#interests']
+  ]);
+  function openPreviousSection() {
+    const destination = previousSections.get(location.hash);
+    if (destination) location.replace(destination);
+  }
+  openPreviousSection();
+  window.addEventListener('hashchange', openPreviousSection);
+}
+
 const theme = document.querySelector('.theme');
 const root = document.documentElement;
 theme.hidden = false;

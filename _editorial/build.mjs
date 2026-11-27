@@ -27,7 +27,7 @@ const articles = readdirSync('_editorial/published').filter(file => file.endsWit
   }
   const body = marked.parse(match[2]);
   const minutes = Math.max(1, Math.ceil(body.replace(/<[^>]*>/g, ' ').trim().split(/\s+/).length / 220));
-  return {...meta, body, minutes, file, path: '/writing/' + slug + '/'};
+  return {...meta, body, minutes, path: '/writing/' + slug + '/'};
 }).sort((a,b) => String(b.date || b.year || '').localeCompare(String(a.date || a.year || '')) || a.title.localeCompare(b.title));
 
 const featured = articles.find(article => article.featured);
@@ -69,7 +69,7 @@ function page({title, path, description, current = path, image, kind = 'website'
 ${noindex ? '<meta name="robots" content="noindex">' : ''}
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="alternate" type="application/rss+xml" title="Christiana Wong · Writing" href="/feed.xml">
-<link rel="preload" href="/assets/fonts/instrumentserif.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/inter.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/assets/fonts/fonts.css">
 <link rel="stylesheet" href="/assets/site.css">
 <script>
@@ -87,7 +87,6 @@ try { const theme = localStorage.getItem('cw-theme'); if (theme === 'light' || t
 </header>
 <main id="main" class="shell" tabindex="-1">${body}</main>
 <footer class="site-footer shell" id="contact">
-  <p>Made with curiosity.</p>
   <nav aria-label="Contact and feeds">${socialLinks}<a href="/feed.xml">RSS</a></nav>
 </footer>
 </body>
@@ -116,7 +115,7 @@ function feature(article) {
 }
 
 function writingRow(article, archive = false) {
-  return `<li class="writing-row"${!archive && article.file === 'a-sunrise-hike.md' ? ' id="sunrise-card"' : ''}${archive ? ' data-entry data-category="' + escape(article.category) + '" data-search="' + escape([article.title,article.description,article.category,article.kind,article.body.replace(/<[^>]*>/g, ' ')].join(' ')) + '"' : ''}>
+  return `<li class="writing-row"${archive ? ' data-entry data-category="' + escape(article.category) + '" data-search="' + escape([article.title,article.description,article.category,article.kind,article.body.replace(/<[^>]*>/g, ' ')].join(' ')) + '"' : ''}>
     <div><p class="eyebrow">${metadata(article)}</p><h3><a href="${article.path}">${escape(article.title)}</a></h3><p>${escape(article.description)}</p></div>
     <span class="row-link" aria-hidden="true">${arrow}</span>
   </li>`;
@@ -149,34 +148,6 @@ const home = `<div class="front-spread">
   <aside class="hero-context" aria-label="About Christy">
     <p class="lede">I’m Christy, a data engineer from Detroit. I like modern art, museums, books, and baking.</p>
   </aside>
-</div>
-<div class="home-index">
-  <section class="home-index-row home-selection" id="writing">
-    <header class="section-head"><h2><a href="/writing/">Writing ${arrow}</a></h2></header>
-    ${articles.length ? '<ul class="writing-list">' + articles.slice(0, 4).map(article => writingRow(article)).join('') + '</ul>' : '<p>Published writing will appear here.</p>'}
-  </section>
-  <section class="home-index-row" id="now">
-    <header class="section-head"><h2><a href="/now/">Lately ${arrow}</a></h2></header>
-    <dl class="lately">${Object.entries(now.sections).filter(([,value]) => value).slice(0,4).map(([key,value]) =>
-      '<div><dt>' + escape(key) + '</dt><dd>' + escape(value) + '</dd></div>').join('')}</dl>
-  </section>
-  <section class="home-index-row" id="reading">
-    <header class="section-head"><h2><a href="/bookshelf/">Bookshelf ${arrow}</a></h2></header>
-    <ul class="preview-books">${books.slice(0,3).map(book =>
-      '<li><a href="/bookshelf/#' + escape(book.id) + '">' + escape(book.title) + '</a><span>' + escape(book.author) + '</span></li>').join('')}</ul>
-  </section>
-  <section class="home-index-row" id="playground">
-    <header class="section-head"><h2><a href="/playground/">Playground ${arrow}</a></h2></header>
-    <div class="home-garden">
-      <div><h3><a href="/playground/#garden">Mathematical garden</a></h3><p>Turn the angle to see how a small change rearranges an entire garden.</p>
-      <label for="preview-angle">Growth angle <output for="preview-angle"></output></label><input id="preview-angle" type="range" min="130" max="145" value="137.5" step="0.1" data-angle></div>
-      <svg viewBox="0 0 360 320" data-garden role="img" aria-label="Generative botanical pattern"></svg>
-    </div>
-  </section>
-  <section class="home-index-row home-about" id="about">
-    <header class="section-head"><h2><a href="/about/">About ${arrow}</a></h2></header>
-    <div><p>Detroit, modern art, applied math, and the turns in between.</p><p id="interests"><a href="/about/#interests">What lights me up</a></p></div>
-  </section>
 </div>`;
 write('index.html', page({title:owner, path:'/', description:'Christiana Wong is a data engineer, art enthusiast, and occasional writer from Detroit.', body:home}));
 
