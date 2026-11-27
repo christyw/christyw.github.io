@@ -153,7 +153,7 @@ const home = `<div class="front-spread">
 </div>`;
 write('index.html', page({title:owner, path:'/', description:'The personal site of Christiana Wong, with writing, a bookshelf, and creative experiments.', body:home}));
 
-const archive = headline('Occasional writing', 'Essays and notes by Christiana Wong.') +
+const archive = headline('Occasional writing', 'I think a lot and write a little.') +
   (featured ? `<section><header class="section-head"><h2>Featured</h2></header>${feature(featured)}</section>` : '') +
   `<section class="archive" aria-labelledby="archive-heading"><header class="section-head"><h2 id="archive-heading">Archive</h2></header>
   <div class="archive-index"><div class="filters" hidden><label>Search writing<input type="search" id="writing-query" placeholder="Search by title or text"></label>
