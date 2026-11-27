@@ -1,7 +1,7 @@
 [
-  {"id":"pachinko","title":"Pachinko","author":"Min Jin Lee","color":"olive","isbn":"9781455563920","amazonAsin":"1455563927"},
-  {"id":"everything","title":"Everything I Never Told You","author":"Celeste Ng","color":"rust","isbn":"9780143127550","amazonAsin":"0143127551"},
-  {"id":"chemistry","title":"Chemistry","author":"Weike Wang","color":"blue","isbn":"9780525432227","amazonAsin":"0525432221"},
-  {"id":"opposite","title":"The Opposite of Loneliness","author":"Marina Keegan","color":"plum","isbn":"9781476753616","amazonAsin":"147675361X"},
-  {"id":"salt","title":"Salt, Fat, Acid, Heat","author":"Samin Nosrat","color":"ochre","isbn":"9781476753836","amazonAsin":"1476753830"}
+  {"id":"pachinko","title":"Pachinko","author":"Min Jin Lee","color":"olive","isbn":"9781455563920","amazonAsin":"1455563927","description":"A novel that follows four generations of a Korean family as they make a life in Japan."},
+  {"id":"everything","title":"Everything I Never Told You","author":"Celeste Ng","color":"rust","isbn":"9780143127550","amazonAsin":"0143127551","description":"After their teenage daughter is found dead, a Chinese American family in 1970s Ohio begins to reckon with what they never knew about her or one another."},
+  {"id":"chemistry","title":"Chemistry","author":"Weike Wang","color":"blue","isbn":"9780525432227","amazonAsin":"0525432221","description":"A chemistry graduate student starts questioning the future she’s been working toward, both in the lab and outside it."},
+  {"id":"opposite","title":"The Opposite of Loneliness","author":"Marina Keegan","color":"plum","isbn":"9781476753616","amazonAsin":"147675361X","description":"A posthumous collection of Marina Keegan’s essays and short fiction, including her reflection on the sense of belonging she found at Yale."},
+  {"id":"salt","title":"Salt, Fat, Acid, Heat","author":"Samin Nosrat","color":"ochre","isbn":"9781476753836","amazonAsin":"1476753830","description":"Samin Nosrat explains how four elements shape the way food tastes and shows how to use them to cook more intuitively."}
 ]

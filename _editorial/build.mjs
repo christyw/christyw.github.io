@@ -144,12 +144,15 @@ function amazonBookLink(book) {
 
 function bookItem(book) {
   const optional = [
-    ['Reading status', book.status], ['Finished', book.finished], ['Reflection', book.reflection]
+    ['Reading status', book.status], ['Finished', book.finished]
   ].filter(([,value]) => value).map(([label, value]) => '<dt>' + label + '</dt><dd>' + escape(value) + '</dd>').join('');
   const related = (book.related || []).map(slug => articles.find(article => article.path === '/writing/' + slug + '/')).filter(Boolean);
   return `<li><details class="book" id="${escape(book.id)}">
     <summary>${bookCover(book)}<span class="book-title">${escape(book.title)}</span><span class="book-author">${escape(book.author)}</span><span class="book-action">Book details</span></summary>
-    <div class="book-details">${optional ? '<dl>' + optional + '</dl>' : ''}
+    <div class="book-details">
+      ${book.description ? '<p>' + escape(book.description) + '</p>' : ''}
+      ${book.reflection ? '<p>' + escape(book.reflection) + '</p>' : ''}
+      ${optional ? '<dl>' + optional + '</dl>' : ''}
       ${book.passage ? '<blockquote>' + escape(book.passage) + '</blockquote>' : ''}
       ${related.length ? '<p>Related writing</p><ul>' + related.map(article => '<li><a href="' + article.path + '">' + escape(article.title) + '</a></li>').join('') + '</ul>' : ''}
       ${book.isbn ? '<a href="https://openlibrary.org/isbn/' + encodeURIComponent(book.isbn) + '">Find this edition at Open Library</a>' : ''}

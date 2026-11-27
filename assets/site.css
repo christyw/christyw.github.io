@@ -160,6 +160,7 @@ figcaption { color: var(--soft); font-size: .875rem; padding-top: .6rem; }
 .book-action::after { content: " +"; }
 .book[open] .book-action::after { content: " −"; }
 .book details, .book-details { color: var(--soft); font-size: .86rem; margin-top: .6rem; }
+.book-details p { margin-bottom: .55rem; }
 .book-details ul { padding-left: 1rem; }
 .book-details dt { font-weight: 600; }
 .book-details dd { margin: .2rem 0 .7rem; }
