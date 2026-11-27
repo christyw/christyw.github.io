@@ -240,5 +240,14 @@ figcaption { color: var(--soft); font-size: .875rem; padding-top: .6rem; }
 }
 
 .book-shop { display: inline-block; margin-top: .5rem; color: var(--accent); font-size: .86rem; }
-.affiliate-disclosure { margin: 0 0 1rem; color: var(--soft); font-size: .9rem; }
+/* Keep the Associates disclosure with the shelf, in the same style as the page’s side note. */
+.affiliate-disclosure {
+  width: fit-content;
+  margin: 0 0 1.1rem;
+  padding-inline-start: .85rem;
+  border-inline-start: 1px solid var(--accent);
+  color: var(--ink);
+  font-size: .9rem;
+  line-height: 1.55;
+}
 .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }

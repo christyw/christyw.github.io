@@ -139,7 +139,7 @@ function amazonBookLink(book) {
   if (!/^[A-Z0-9]{10}$/.test(book.amazonAsin)) throw new Error('Invalid Amazon ASIN for ' + book.title);
   const url = new URL('/dp/' + book.amazonAsin, 'https://www.amazon.com');
   if (amazonTrackingId) url.searchParams.set('tag', amazonTrackingId);
-  return `<a class="book-shop" href="${escape(url.href)}"${amazonTrackingId ? ' rel="sponsored"' : ''}>Amazon<span class="visually-hidden"> for ${escape(book.title)}</span></a>`;
+  return `<a class="book-shop" href="${escape(url.href)}"${amazonTrackingId ? ' rel="sponsored" aria-describedby="amazon-disclosure"' : ''}>Amazon<span class="visually-hidden"> for ${escape(book.title)}</span></a>`;
 }
 
 function bookItem(book) {
@@ -192,7 +192,7 @@ for (const [i, article] of articles.entries()) {
 
 write('bookshelf/index.html', page({title:'Bookshelf', path:'/bookshelf/', description:'A few favorite books from Christiana Wong’s bookshelf.',
   body:headline('Books I’ve kept', profile.booksIntroduction, 'Bookshelf') +
-    (hasAffiliateLinks ? '<p class="affiliate-disclosure">As an Amazon Associate I earn from qualifying purchases.</p>' : '') + `<ul class="books-grid">${books.map(book => bookItem(book)).join('')}</ul>`}));
+    (hasAffiliateLinks ? '<p class="affiliate-disclosure" id="amazon-disclosure">As an Amazon Associate I earn from qualifying purchases.</p>' : '') + `<ul class="books-grid">${books.map(book => bookItem(book)).join('')}</ul>`}));
 
 const playground = headline('Playground', 'Small experiments in mathematics and color.') + `<div class="experiments">
 <section id="garden" class="experiment"><header class="section-head"><h2>Mathematical garden</h2></header>
