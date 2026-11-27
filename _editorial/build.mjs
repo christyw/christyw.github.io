@@ -9,6 +9,11 @@ const categories = ['Life & Identity', 'Technology & Thinking', 'Art & Culture',
 const data = name => JSON.parse(readFileSync('_editorial/' + name + '.json', 'utf8'));
 const profile = data('profile');
 const books = data('books');
+const amazonTrackingId = data('amazon').trackingId.trim();
+if (amazonTrackingId && !/^[a-z0-9][a-z0-9-]*$/i.test(amazonTrackingId)) {
+  throw new Error('Expected an Amazon Associates tracking ID in _editorial/amazon.json.');
+}
+const hasAffiliateLinks = amazonTrackingId && books.some(book => book.amazonAsin);
 const now = data('now');
 const escape = value => String(value ?? '').replace(/[&<>"']/g, char => ({
   '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
@@ -129,6 +134,14 @@ function bookCover(book) {
   </span>`;
 }
 
+function amazonBookLink(book) {
+  if (!book.amazonAsin) return '';
+  if (!/^[A-Z0-9]{10}$/.test(book.amazonAsin)) throw new Error('Invalid Amazon ASIN for ' + book.title);
+  const url = new URL('/dp/' + book.amazonAsin, 'https://www.amazon.com');
+  if (amazonTrackingId) url.searchParams.set('tag', amazonTrackingId);
+  return `<a class="book-shop" href="${escape(url.href)}"${amazonTrackingId ? ' rel="sponsored"' : ''}>Amazon${amazonTrackingId ? ' (paid link)' : ''}<span class="visually-hidden"> for ${escape(book.title)}</span></a>`;
+}
+
 function bookItem(book) {
   const optional = [
     ['Reading status', book.status], ['Finished', book.finished], ['Reflection', book.reflection]
@@ -140,7 +153,7 @@ function bookItem(book) {
       ${book.passage ? '<blockquote>' + escape(book.passage) + '</blockquote>' : ''}
       ${related.length ? '<p>Related writing</p><ul>' + related.map(article => '<li><a href="' + article.path + '">' + escape(article.title) + '</a></li>').join('') + '</ul>' : ''}
       ${book.isbn ? '<a href="https://openlibrary.org/isbn/' + encodeURIComponent(book.isbn) + '">Find this edition at Open Library</a>' : ''}
-    </div></details></li>`;
+    </div></details>${amazonBookLink(book)}</li>`;
 }
 
 const home = `<div class="front-spread">
@@ -175,7 +188,8 @@ for (const [i, article] of articles.entries()) {
 }
 
 write('bookshelf/index.html', page({title:'Bookshelf', path:'/bookshelf/', description:'A few favorite books from Christiana Wong’s bookshelf.',
-  body:headline('Books I’ve kept', profile.booksIntroduction, 'Bookshelf') + `<ul class="books-grid">${books.map(book => bookItem(book)).join('')}</ul>`}));
+  body:headline('Books I’ve kept', profile.booksIntroduction, 'Bookshelf') +
+    (hasAffiliateLinks ? '<p class="affiliate-disclosure">As an Amazon Associate I earn from qualifying purchases.</p>' : '') + `<ul class="books-grid">${books.map(book => bookItem(book)).join('')}</ul>`}));
 
 const playground = headline('Playground', 'Small experiments in mathematics and color.') + `<div class="experiments">
 <section id="garden" class="experiment"><header class="section-head"><h2>Mathematical garden</h2></header>

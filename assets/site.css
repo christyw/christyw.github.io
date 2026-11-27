@@ -237,3 +237,7 @@ figcaption { color: var(--soft); font-size: .875rem; padding-top: .6rem; }
   .archive-index .filters { display: grid; }
   .article-page .essay-photo img { aspect-ratio: 1.52; }
 }
+
+.book-shop { display: inline-block; margin-top: .5rem; color: var(--accent); font-size: .86rem; }
+.affiliate-disclosure { margin: 0 0 1rem; color: var(--soft); font-size: .9rem; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }

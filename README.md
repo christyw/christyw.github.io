@@ -25,9 +25,13 @@ Keep unfinished work outside the published directory. `_editorial/editorial-back
 
 ## Add a book or update Now
 
-- Add a record to `_editorial/books.json` with a unique lowercase `id`, `title`, and `author`. Optional fields include `color` (olive, rust, blue, plum, ochre), `isbn`, `status`, `finished`, `reflection`, `passage`, and `related` (article slugs). An image at `assets/covers/<id>.webp` takes precedence over the typographic cover.
+- Add a record to `_editorial/books.json` with a unique lowercase `id`, `title`, and `author`. Optional fields include `color` (olive, rust, blue, plum, ochre), `isbn`, `amazonAsin` (the ten-character product ID on Amazon.com), `status`, `finished`, `reflection`, `passage`, and `related` (article slugs). An image at `assets/covers/<id>.webp` takes precedence over the typographic cover.
 - Update `_editorial/now.json` and its `updated` date.
 - Regenerate and commit the output after either edit.
+
+### Amazon Associates links
+
+Set `trackingId` in `_editorial/amazon.json` to the Amazon.com Associates tracking ID for this site, then rebuild. A configured ID adds the `tag` parameter, per-link disclosure, and Amazon Associates statement to the bookshelf. An empty value produces regular Amazon links.
 
 ## Deployment
 
