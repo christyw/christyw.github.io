@@ -95,7 +95,7 @@ try { const theme = localStorage.getItem('cw-theme'); if (theme === 'light' || t
 }
 
 function headline(title, description, label) {
-  return `<header class="page-intro">${label ? '<p class="eyebrow">' + escape(label) + '</p>' : ''}<h1>${escape(title)}</h1><p class="lede">${escape(description)}</p></header>`;
+  return `<header class="page-intro">${label ? '<p class="eyebrow">' + escape(label) + '</p>' : ''}<h1>${escape(title)}</h1>${description ? '<p class="lede">' + escape(description) + '</p>' : ''}</header>`;
 }
 
 function cover(article, extra = '') {
@@ -153,7 +153,7 @@ const home = `<div class="front-spread">
 </div>`;
 write('index.html', page({title:owner, path:'/', description:'The personal site of Christiana Wong, with writing, a bookshelf, and creative experiments.', body:home}));
 
-const archive = headline('Occasional writing', 'Essays and notes by Christiana Wong.') +
+const archive = headline('Occasional writing', 'I think a lot and write a little.') +
   (featured ? `<section><header class="section-head"><h2>Featured</h2></header>${feature(featured)}</section>` : '') +
   `<section class="archive" aria-labelledby="archive-heading"><header class="section-head"><h2 id="archive-heading">Archive</h2></header>
   <div class="archive-index"><div class="filters" hidden><label>Search writing<input type="search" id="writing-query" placeholder="Search by title or text"></label>
@@ -205,7 +205,7 @@ const nowBody = headline('Now', 'What I’m up to these days.') +
     '<div><dt>' + escape(key) + '</dt><dd>' + (value ? escape(value) : 'To be updated.') + '</dd></div>').join('')}</dl>`;
 write('now/index.html', page({title:'Now', path:'/now/', description:'A short update from Christiana Wong.', body:nowBody}));
 
-const biography = headline('A bit about me', 'Christiana Wong, also known as Christy.', 'About') +
+const biography = headline('A bit about me', '', 'About') +
   `<div class="bio-grid"><div class="prose">${profile.biography.map(p=>'<p>' + p + '</p>').join('')}
     <p>I worked as a data engineer at Airbnb.org, supporting disaster response and emergency housing. These days I’m a data engineer at OpenAI. I’ve lived in New York and San Francisco.</p>
   </div><figure><img src="/assets/portrait.webp" alt="Christiana Wong" width="800" height="800"></figure></div>
