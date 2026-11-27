@@ -146,7 +146,7 @@ function bookItem(book) {
 const home = `<div class="front-spread">
   <header class="home-hero"><h1><span>We’ll get to</span> <span>the point</span> <span class="headline-ending">eventually<span class="headline-period">.</span></span></h1></header>
   <aside class="hero-context" aria-label="About Christy">
-    <p class="lede">I’m a perfectionist about a surprisingly narrow range of things.</p>
+    <p class="lede">Hi, I’m Christy. I’m a perfectionist about a surprisingly narrow range of things.</p>
   </aside>
 </div>`;
 write('index.html', page({title:owner, path:'/', description:'The personal site of Christiana Wong, with writing, a bookshelf, and creative experiments.', body:home}));
