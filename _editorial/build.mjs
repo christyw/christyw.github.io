@@ -142,7 +142,6 @@ function bookItem(book) {
       ${optional ? '<dl>' + optional + '</dl>' : ''}
       ${book.passage ? '<blockquote>' + escape(book.passage) + '</blockquote>' : ''}
       ${related.length ? '<p>Related writing</p><ul>' + related.map(article => '<li><a href="' + article.path + '">' + escape(article.title) + '</a></li>').join('') + '</ul>' : ''}
-      ${book.isbn ? '<a href="https://openlibrary.org/isbn/' + encodeURIComponent(book.isbn) + '">Find this edition at Open Library</a>' : ''}
     </div></details></li>`;
 }
 
